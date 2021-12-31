@@ -1,0 +1,12 @@
+pre.lua .kw { color: #0d8bca; font-weight: bold; }
+pre.lua .co { color: #888; font-weight: normal; }
+pre.lua .nu { color: red; }
+pre.lua .st { color: #008000; }
+pre.lua .op, pre.lua .cb { color: #008; font-weight: bold }
+
+#night:checked + .main pre.lua .op,
+#night:checked + .main pre.lua .cb { color: #c0c0c0; }
+#night:checked + .main pre.lua .nu { color: #FF8080; }
+#night:checked + .main pre.lua .st { color: #FCF320; }
+#night:checked + .main pre.lua .kw { color: #9DEC76; }
+#night:checked + .main pre.lua .co { color: #5B995B; }

@@ -1,0 +1,60 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<title><!--%[title||untitled]--></title>
+<meta name="viewport" content="width=device-width" />
+<meta name="livenode" content="#doc" />
+<!--%[if theme-color]-->
+<meta property="theme-color" content="<!--%[theme-color]-->" />
+<!--%[endif]-->
+<meta property="og:type" content="article" />
+<meta property="og:locale" content="en_us" />
+<meta property="og:site_name" content="YellowAfterlife" />
+<meta property="og:title" content="<!--%[title||untitled]-->" />
+<!--%[if og:url]-->
+<meta property="og:url" content="<!--%[og:url]-->" />
+<meta property="twitter:url" content="<!--%[og:url]-->" />
+<!--%[endif]-->
+<!--%[if og:desc]-->
+<meta property="og:description" content="<!--%[og:desc]-->" />
+<meta property="twitter:description" content="<!--%[og:desc]-->" />
+<!--%[endif]-->
+<!--%[if og:image]-->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="og:image" content="<!--%[og:image]-->" />
+<meta property="og:image:width" content="<!--%[og:image:width]-->" />
+<meta property="og:image:height" content="<!--%[og:image:height]-->" />
+<meta property="twitter:image" content="<!--%[og:image]-->" />
+<meta property="twitter:image:width" content="<!--%[og:image:width]-->" />
+<meta property="twitter:image:height" content="<!--%[og:image:height]-->" />
+<!--%[endif]-->
+<script type="text/javascript">
+if (document.location.host == "yal.cc" && location.protocol == "http:") {
+	document.location.protocol = "https:";
+}
+</script>
+<style type="text/css">/*[include inc/base.css]*/</style>
+<!--%[if tag:gml]-->
+<style type="text/css" id="lang_gml">/*[include inc/lang-gml.css]*/</style>
+<!--%[endif]-->
+<!--%[if tag:lua]-->
+<style type="text/css" id="lang_lua">/*[include inc/lang-lua.css]*/</style>
+<!--%[endif]-->
+<style type="text/css" id="night_css">/*[include inc/night.css]*/</style>
+<style type="text/css" id="print_css">/*[include inc/print.css]*/</style>
+<noscript><style>/*[include inc/noscript.css]*/</style></noscript>
+</head><body>
+<input type="checkbox" id="night" checked/>
+<div class="main <!--%[mainclass||]-->">
+<script type="text/javascript">/*[include inc/night.js]*/</script>
+<main class="page">
+<p><!--%[intro]--></p><p class="display-controls">
+<!--%[if !linear]-->Click on sections to expand/collapse them.<br><!--%[endif]-->
+Quick display controls: <!--%[if !linear]--><a href="#" onclick="opt_none(); return false">Categories</a>
+&middot; <a href="#" onclick="opt_list(); return false">Sections</a>
+&middot; <a href="#" onclick="opt_all(); return false">Everything</a>
+&middot; <!--%[endif]--><label for="night">Toggle night mode</label><br/>
+</p><section id="doc">
+<!--<doc--><!--doc>-->
+</section></main></div>
+<script type="text/javascript">/*[include inc/script.js]*/</script>
+</body></html>

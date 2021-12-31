@@ -1,0 +1,43 @@
+/* GameMakerLanguage */
+pre.gmlmd .md { color: #7A81A9 } /* #define */
+pre.gmlmd .kw { color: #008; font-weight: bold } /* keyword */
+pre.gmlmd .co { color: #080 } /* comment */
+pre.gmlmd .nu { color: #00f } /* number */
+pre.gmlmd .nx { color: #00f } /* hex */
+pre.gmlmd .st { color: #00f } /* string */
+pre.gmlmd .ts { color: #00f } /* template string */
+pre.gmlmd .op { color: #000 } /* operator */
+pre.gmlmd .cb { color: #008; font-weight: bold } /* curly brace */
+pre.gmlmd .sv { color: #800 } /* std func */
+pre.gmlmd .sf { color: #800 } /* std var */
+pre.gmlmd .ri { color: #0078aa } /* assets */
+pre.gmlmd .uf { color: #808 } /* user func */
+pre.gmlmd .uv { color: #000 } /* user var */
+pre.gmlmd .lv { color: #648 } /* local var */
+pre.gmlmd .fd { color: #804 } /* field */
+
+#night:checked + .main pre.gmlmd .op { color: #CCCCCC }
+#night:checked + .main pre.gmlmd .co { color: #5B995B }
+#night:checked + .main pre.gmlmd .kw { color: #FFB871 }
+#night:checked + .main pre.gmlmd .md { color: #FFB871 }
+#night:checked + .main pre.gmlmd .cb { color: #FFB871 }
+#night:checked + .main pre.gmlmd .sf { color: #FFB871 }
+#night:checked + .main pre.gmlmd .uf { color: #FFB871 }
+#night:checked + .main pre.gmlmd .nu { color: #FF8080 }
+#night:checked + .main pre.gmlmd .st { color: #FCF320 }
+#night:checked + .main pre.gmlmd .ts { color: #FF8080 }
+#night:checked + .main pre.gmlmd .sv { color: #FF8080 }
+#night:checked + .main pre.gmlmd .gv { color: #FF80FF }
+#night:checked + .main pre.gmlmd .ri { color: #FF8080 }
+#night:checked + .main pre.gmlmd .lv { color: #FFF899 }
+#night:checked + .main pre.gmlmd .uv { color: #B2B1FF }
+#night:checked + .main pre.gmlmd .fd { color: #B2B1FF }
+
+#night:checked + .main pre.gmlmd a.uf,
+#night:checked + .main pre.gmlmd a.kw,
+#night:checked + .main pre.gmlmd a.sf {
+	background-color: #431;
+}
+#night:checked + .main pre.gmlmd a.sv {
+	background-color: #422;
+}

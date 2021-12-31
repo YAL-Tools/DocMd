@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project version="2">
+  <!-- Output SWF options -->
+  <output>
+    <movie outputType="Application" />
+    <movie input="" />
+    <movie path="bin\user\gamemaker_highlight.user.js" />
+    <movie fps="0" />
+    <movie width="0" />
+    <movie height="0" />
+    <movie version="0" />
+    <movie minorVersion="0" />
+    <movie platform="JavaScript" />
+    <movie background="#FFFFFF" />
+  </output>
+  <!-- Other classes to be compiled into your SWF -->
+  <classpaths>
+    <class path="src" />
+  </classpaths>
+  <!-- Build options -->
+  <build>
+    <option directives="js-header=src/gml/user/gmlhl.user.js&#xA;nodejs" />
+    <option flashStrict="False" />
+    <option noInlineOnDebug="False" />
+    <option mainClass="gml.user.HintWeb" />
+    <option enabledebug="False" />
+    <option additional="-dce full&#xA;--macro gml.user.HintWebMcr.prebuild()" />
+  </build>
+  <!-- haxelib libraries -->
+  <haxelib>
+    <library name="sfmix" />
+  </haxelib>
+  <!-- Class files to compile (other referenced classes will automatically be included) -->
+  <compileTargets>
+    <compile path="src\gml\user\HintWeb.hx" />
+  </compileTargets>
+  <!-- Paths to exclude from the Project Explorer tree -->
+  <hiddenPaths>
+    <hidden path="obj" />
+  </hiddenPaths>
+  <!-- Executed before build -->
+  <preBuildCommand />
+  <!-- Executed after build -->
+  <postBuildCommand alwaysRun="False" />
+  <!-- Other project options -->
+  <options>
+    <option showHiddenPaths="False" />
+    <option testMovie="Custom" />
+    <option testMovieCommand="" />
+  </options>
+  <!-- Plugin storage -->
+  <storage />
+</project>

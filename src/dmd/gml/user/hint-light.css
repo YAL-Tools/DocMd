@@ -1,0 +1,21 @@
+pre {
+	font-style: normal;
+	background: #ffffff;
+	color: #000000;
+}
+pre.background-important {
+	background: #ffffff!important;
+}
+pre .co { color: #008000 }
+pre .kw { color: #000080; font-weight: bold }
+pre .md { color: #000080; font-weight: bold }
+pre .cb { color: #000080; font-weight: bold }
+pre .sf { color: #A00000 }
+pre .uf { color: #A00000 }
+pre .nu { color: #FA3232 }
+pre .st { color: #0000FF }
+pre .ts { color: #0000FF }
+pre .sv { color: #A00000 }
+pre .ri { color: #2B91AF }
+pre .lv { color: #6A3D7F }
+pre .uv { color: #000000 }

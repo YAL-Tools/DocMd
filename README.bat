@@ -1,0 +1,1 @@
+docmd --unindent --linear --watch README.dmd README.tpl.md README.md

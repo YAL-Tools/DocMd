@@ -1,0 +1,497 @@
+```hide
+In what can be considered a feat of comedy,
+I'm rendering supported HTML to a "markdown" document from my own renderer.
+```
+# DocMd (working title?)
+
+A Markdown-esque renderer written in Haxe.
+
+As per name, it is primarily used for writing section-based documentation ([example](https://yal.cc/r/17/gmlive/)),
+although it has since been expanded for use [in my blog posts](https://yal.cc/) and various other bits (like my [portfolio](https://yal.cc/works/), or my _[other portfolio](https://yal.cc/works-ext/)_, or one-off uses).
+
+## [Motivation]()
+
+--{
+- Lack of support for nested sections in "vanilla" Markdown.
+- Syntactic ambiguities in "vanilla" Markdown. \
+  (e.g. mixing lists/tables/code blocks gets nasty quickly and you have to hand-write HTML)
+- Documents that I write often require "one-off" tags to maintain editable source files.
+}
+
+## [Features]()
+
+--{
+- Mostly-familiar syntax (see notes below)
+- GML syntax highlighting (complete with cross-links)
+- Supports [hscript](https://github.com/HaxeFoundation/hscript) for automation and implementing custom tags on per-document basis.
+}
+
+## [Building]()
+
+```
+haxe -lib hscript -cp src -neko bin/docmd.n -D hscriptPos -main DocMdSys -dce no
+```
+
+## [Running]()
+
+```
+neko docmd.n <input.dmd> <template.html> <output.html> [...options]
+```
+
+Required arguments: --{
+-- `input`\
+	A path to a file with markdown to render.
+--	`template`\
+	The [template page](HTML template) to insert generated HTML to.
+--	`output`\
+	A path to a file to save resulting HTML to.
+}
+
+If the three are named like `name.html` (input), `name.dmd.html` (template), `name.html` (output),
+template/output arguments can be omitted.
+
+Supported options: --{
+	- `--linear`\
+	Enables "linear" render mode
+	(e.g. for blog posts or this README, as opposed to the default nested section mode),
+	along with related post-fixes.
+	- `--watch`\
+	Keeps the application running and re-renders the file whenever the source files (or their included dependencies) change.
+	- `--server <port>`\
+	Same as above, but also opens a _very simple_ web server on specified port.\
+	Combine with `localhost-live.js` userscript to have the in-browser preview update whenever you save the file.
+	- `--include <path>`\
+	Prepends the markdown by contents of the given file.\
+	Good for setting up shared variables/helpers for multiple `dmd` files.
+	- `--unindent`\
+	Removes leading spaces from "plaintext" parts of the output.\
+	When generating a `md` file from `dmd` (like this one!), you'll want this to prevent Markdown renderer from turning indented snippets of HTML into code blocks.
+	- `--gml-api <path>`\
+	Loads API entries (in `fnames`-like format) for GML syntax highlighting.
+	- `--gml-assets <path>`\
+	Loads asset names (read: grabs every single identifier in the file) for GML syntax highlighting.
+	- `--gml-rx-script <regular expression>`\
+	Specifies a regular expression for determining that an identifier in GML code is a script name
+	and should be highlighted accordingly.
+	- `--gml-rx-asset <regular expression>`\
+	Specifies a regular expression for determining that an identifier in GML code is an asset name
+	and should be highlighted accordingly.
+	- `--set <name>`, `--set <name>=<value>`\
+	Fills out [template variables](Template variables)
+	(as an alternative to using `\`\`\`set` in dmd itself)
+}
+
+## [Syntax]()
+
+Here, `—` means no native tag, which can be workarounded with HTML insertion in Markdown, plugins in Markdown renderers that support them, or custom tags and/or variables in DocMd.
+
+```exec
+ntr = "</p></td></tr><tr><td><p>";
+ntd = "</p></td><td><p>";
+nth = "</p></th><th><p>";
+```
+```raw </p><table><tr><th><p>```
+Tag
+${nth} Markdown
+${nth} DMD
+${nth} Notes on DMD
+```raw </p></th></tr><tr><td>```
+Line break
+${ntd} 2 spaces before EOL
+${ntd} 2 spaces before EOL \
+_or_ `\\` before EOL
+${ntd} 
+<!-- --------------------- -->
+${ntr} _Italic_
+${ntd} `*text*`, `_text_`
+${ntd} `_text_`
+${ntd} Doesn't trigger on mid-identifier matches
+<!-- --------------------- -->
+${ntr} *Bold*
+${ntd} `**text**`, `__text__`
+${ntd} `*text*`
+${ntd} 
+<!-- --------------------- -->
+${ntr} ~~strikethrough~~
+${ntd} `~~text~~`
+${ntd} `~~text~~`
+${ntd} 
+<!-- --------------------- -->
+${ntr} ${"<h3>Headers</h3>"}
+${ntd} `# Text`,\
+`## Text`,
+```
+Text
+------
+```
+${ntd} `# Text`,\
+`## Text`, etc.
+${ntd} `# [Text](name)` for permalinks;\
+`# [Text]()` to auto-create permalink;
+<!-- --------------------- -->
+${ntr} [Links](Syntax)
+${ntd} `[text](url)`
+${ntd} `[text](url)` \
+or `[text-url]`
+${ntd} Auto-converts URLs not starting with a protocol or a slash into `#urls`;\
+URL➜text generation uses same rules as headers;\
+Prepend URL with `+` for new tab (`noreferrer noopener`);\
+Prepend URL with `!` to add `nofollow`;
+<!-- --------------------- -->
+${ntr} Ruler
+---
+${ntd} ```
+---
+***
+___
+```
+${ntd} ``` ---```
+${ntd} 
+<!-- --------------------- -->
+${ntr} [Abbr](^Mouseover text in 'title' attribute)
+${ntd} —
+${ntd} `[text](^title)`
+${ntd} 
+<!-- --------------------- -->
+${ntr} ^(Sup)
+${ntd} —
+${ntd} `^(text)`, `^[text]`
+${ntd} `^[]` doesn't unwrap, so `^[1]` becomes ^[1] - good for mid-section citations
+<!-- --------------------- -->
+${ntr} Images
+${ntd} `![alt](url)`
+${ntd} `![alt](url)`\
+or `![url]` (no alt-text)
+${ntd} 
+<!-- --------------------- -->
+${ntr} ${"<ul><li>Unordered list</li></ul>"}
+${ntd} ```
+- one
+* two (alt.)
+```
+${ntd} ```
+--{
+- one
+-- two (alt.)
+}
+```
+${ntd} Closing `}` may also be preceded by `--`
+<!-- --------------------- -->
+${ntr} ${"<ol><li>Ordered list</li></ol>"}
+${ntd} ```
+1. one
+2. two
+```
+${ntd} ```
+##{
+- one
+-- two (alt.)
+}
+```
+${ntd} Not well thought-out - rarely used.
+<!-- --------------------- -->
+${ntr} ${"<blockquote>blockquote</blockquote>"}
+${ntd} ```
+> text
+```
+${ntd}
+```
+	```quote
+	plaintext
+	```
+	```quotemd
+	markdown
+	```
+```
+${ntd} Not used often either.
+<!-- --------------------- -->
+${ntr} ``` code```
+${ntd}
+```
+	```
+	code
+	```
+	```kind
+	code
+	```
+	    code (indented)
+```
+${ntd}
+```
+	```
+	code
+	```
+	```kind
+	code
+	```
+	```kind code```
+```
+${ntd} If code block is the first thing at a line, unindents and matches the closing tag with same indentation, meaning that you can do
+```
+	Code example:
+	```
+		```
+		code
+		```
+	```
+```
+More on supported blocks later
+```raw </p></td></tr></table><p>```
+
+```hide
+<!-- --------------------- -->
+${ntr} 
+${ntd} 
+${ntd} 
+${ntd} 
+```
+
+### [HTML inserts]()
+
+DocMd doesn't automatically process HTML tags (with exception of `<!--comments-->`),
+but you may use `${}` or
+```
+	```raw
+	HTML code here
+	```
+```
+to inject HTML.
+
+## [Code blocks]()
+
+DocMd supports a number of code block types out of box: --{
+	- `raw`\
+	Injects HTML as-is, as per above.\
+	Note that this will not auto-close paragraphs/etc.
+	```
+		```raw
+		<b>hello</b>
+		```
+	```
+	➜
+	```raw <b>hello</b> ```
+	
+	- `quote`\
+	Inserts a plaintext blockquote,
+	```
+		```quote
+		This is *plaintext*
+		```
+	```
+	➜
+	```quote
+	This is *plaintext*
+	```
+	
+	- `quotemd`\
+	Like above, but will process markdown in it
+	```
+		```quotemd
+		This is *markdown*
+		```
+	```
+	➜
+	```quotemd
+	This is *markdown*
+	```
+	
+	- `exec`\
+	Executes an hscript code snippet.
+	
+	If the code returns a non-*null* value, it will be appended to output as HTML (see [hscript API]).
+	```
+		```exec
+		return "<b>" + ["hello", "there"].join(" ") + "</b>";
+		```
+	```
+	➜
+	```exec
+	return "<b>" + ["hello", "there"].join(" ") + "</b>";
+	```
+	- `codecss`\
+	Adds the given CSS to the next code block's `style` attribute - e.g.
+	```
+		```codecss
+		height: 35%;
+		height: 35vh;
+		```
+		```
+		this code block will take up 35% of browser height
+		```
+	```
+	- `hide`\
+	Doesn't output _anything_.
+	- `set`, `setmd`\
+	Sets [template variables](Template variables).
+	- `gml`\
+	Pretty reasonable syntax highlighting for GameMaker Language (GML). Has a bunch of tweaks (see below)
+	- `lua`\
+	Less-reasonable syntax highlighting for Lua that's hacked on top of above.
+}
+GML-related tags:
+--{
+	- `gmlapi`\
+	Processes `fnames`-like entries for GML highlighting, similar to the `--gml-api` option - e.g.
+	```
+		```gmlapi
+		a_function()
+		a_variable
+		a_constant#
+		```
+	```
+	- `gmlassets`\
+	Adds asset names for GML highlighting, similar to the `--gml-assets` option - e.g.
+	```
+		```gmlassets
+		objPlayer objController
+		```
+	```
+	- `gmlkeywords`\
+	Adds keywords for GML highlighting - e.g.
+	```
+		```gmlkeywords
+		select option
+		```
+	```
+	This is mostly handy if you are using `gml` tag to highlight something that isn't _really_ GML code (such as Tiny Expression's Runtime documentation does).
+	- `gmlhint`\
+	The given snippet of GML code (containing `#define`s and variable declarations) will be used
+	when highlighting the next `gml` block.
+	
+	This is handy for cases when a piece of code is being shown "out of context"
+	(or you are interrupting it halfway through with an explanation of what's going on)
+	but you still want consistent syntax highlighting.
+}
+
+## [Template variables]()
+
+```exec
+DocMd.addCodeTag("setdemo", function(code) {
+	var html = render('```' + code + '```');
+	html = StringTools.replace(html, "%\\[", "%[");
+	html = StringTools.replace(html, "```"+"\\set", "```"+"set");
+	return html;
+});
+```
+
+DocMd has a template variable system for reusing snippets of text, inserting contents of other
+files, and alike.
+
+```setdemo
+	```set toolname DocMd```
+	%\[toolname] is a Markdown-esque renderer.
+```➜
+```set toolname DocMd```
+%[toolname] is a Markdown-esque renderer.
+
+You can also load template variables from files,
+```setdemo
+	```\set intro ./intro.dmd```
+	%\[intro]
+```
+
+Variables can be also accessed through hscript and used to manipulate generated code (see below).
+
+The following variables have special purpose: --{
+	- `template`: allows setting page template in the page itself.
+	- `tag:defcode`: changes how code blocks without a "type" will be processed (e.g. setting this to `gml` will process them as GML snippets by default).
+}
+
+## [HTML template]()
+
+This file will be used as a template for resulting HTML (or HTML-containing) file.
+
+At the very least, your file should contain
+```
+<!--<doc--><!--doc>-->
+```
+that the generated code will be inserted between,
+but you may also utilize conditional comments to customize the output or include/exclude parts of it
+depending on the input:
+--{
+	- `<!--%[variable]-->`\
+	Will be replaced by contents of the given [template variable](Template variables) - e.g.
+	${"<pre>```" + "set title cool document```</pre>"}
+	and then in the template:
+	```
+	<title><!--%[title]--></title>
+	```
+	- `<!--%[if variable]-->` .. \[`<!--%[else]-->`\] .. `<!--%[endif]-->`\
+	Conditional processing for template variables.
+	
+	Currently very simple - just `variable` and `!variable` really.
+	Perhaps another use case for hscript.
+	- `<!--include relPath-->`, `/*include relPath*/`\
+	Will be replaced by the contents of specified file.\
+	Useful for generating single-page outputs while keeping the source readable!
+}
+
+## [default.html](default-template)
+
+This is the template that I use for my documentation.
+
+It supports the following template variables:
+--{
+	- `title`: page and OpenGraph title.
+	- `intro`: shown above page controls.
+	- `theme-color`: [theme-color](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name/theme-color) meta - used for various accents in browsers and embeds.
+	- `og:url`: an _absolute_ URL to the page for OpenGraph.
+	- `og:desc`: an excerpt for OpenGraph - shown in embeds.
+	- `og:image`: an _absolute_ URL to the image for OpenGraph. Usually 16:9 or so.
+	- `og:image:width`: width of above, in pixels.
+	- `og:image:height`: height of above, in pixels.
+}
+
+## [hscript API]()
+
+--{
+	- `global`\
+	A reference to this same global scope, in case you need it.
+	
+	- `print(...values)`\
+	Appends one or more values to output. If the snippet also returns a value, it will be appended afterwards.
+	
+	- `render(dmd:String)->String`\
+	Processes the given DocMd snippet and returns the resulting HTML.
+	
+	- `include(path:String)->String`\
+	Reads a file from a relative path, processes it, and returns the resulting HTML.
+	
+	- `sfmt(format:String, ...values)->String`\
+	A simple helper that replaces `%`s in a format string by respective values
+	(e.g. `sfmt("%/%", 1, 2)` returns `"1/2"`).
+	
+	- `DocMd.makeID(text:String)->String`\
+	Converts a text string into a valid #id (e.g. `section 2` ➜ `section-2`) using the same rules as the headers/links do.
+	
+	- `DocMd.addCodeTag(name:String, handler:String->Any)`\
+	Registers a new code block handler. The handler receives the snippet inside the block and should return the resulting HTML. For example, you could do
+	```
+		```exec
+		DocMd.addCodeTag("center", function(code) {
+			return '<div style="text-align: center">' + render(code) + '</div>';
+		});
+		```
+		```center
+		hello!
+		```
+	```
+	to have a shorthand for centered text.
+	
+	- `DocMd.templateVars:Map<String, String>`\
+	A map containing the collected template variables.
+	
+	- `StringBufExt`\
+	An extension of `StringBuf` that adds `addFormat(format:String, ...values)` with same logic as `sfmt`.
+	
+	- `File.getContent(path:String)->String`\
+	Grabs file content as text from specified file.
+	
+	- `File.awaitChanges(path:String)`\
+	When in `watch` or `server` mode, will watch for changes to specified path.
+}
+See exposed standard library items (Std, Math, StringTools, Reflect, etc.) or add your own in `src/dmd/tags/TagExecAPI.hx`).
+
+---
+
+(...is that all?)

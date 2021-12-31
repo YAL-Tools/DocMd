@@ -1,0 +1,60 @@
+pre {
+	font-style: normal;
+	background: #222222;
+	color: #C0C0C0;
+}
+pre.background-important {
+	background: #222222!important;
+}
+pre.has-line-numbers {
+	padding: 0;
+	margin: 0;
+}
+pre table {
+	margin: 0;
+	border-collapse: collapse;
+	border-spacing: 0px;
+}
+pre td {
+	padding: 0;
+	border: 0;
+}
+pre tr:first-of-type td {
+	padding-top: 4px;
+}
+pre tr:last-of-type td {
+	padding-bottom: 4px;
+}
+pre .code-line {
+	padding-left: 10px;
+	color: #C0C0C0;
+}
+pre .code-line-number {
+	width: 1%;
+	white-space: nowrap;
+	text-align: right;
+	padding-left: 10px;
+	padding-right: 10px;
+	border-right: 2px solid #97B2C8;
+	min-width: 20px;
+	background-color: #2B343B;
+	color: #40C3F4;
+}
+pre .code-line-number::before {
+	content: attr(data-line-number);
+}
+pre .co { color: #5B995B }
+pre .kw { color: #FFB871 }
+pre .md { color: #FFB871 }
+pre .cb { color: #FFB871 }
+pre .sf { color: #FFB871 }
+pre .uf { color: #FFB871 }
+pre .nu { color: #FF8080 }
+pre .st { color: #FCF320 }
+pre .ts { color: #FF8080 }
+pre .sv { color: #FF8080 }
+pre .gv { color: #FF80FF }
+pre .ri { color: #FF8080 }
+pre .lv { color: #FFF899 }
+pre .uv { color: #B2B1FF }
+pre .fd { color: #B2B1FF }

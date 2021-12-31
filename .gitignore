@@ -1,0 +1,8 @@
+/bin/*
+!/bin/default.html
+!/bin/inc
+!/bin/fnames
+!/bin/fnames2
+!/bin/node-mime.json
+/src/gml/v1/fnames
+/src/gml/v2/fnames

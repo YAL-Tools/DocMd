@@ -1,0 +1,11 @@
+#doc header::before {
+	content: "~";
+}
+#doc header:hover {
+	border-left-color: #f3f3f3;
+	background: inherit;
+}
+#doc { display: inherit }
+#doc section:not(.open) > article {
+	display: inherit;
+}

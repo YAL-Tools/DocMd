@@ -1,0 +1,14 @@
+@media print {
+	.main { background-color: transparent }
+	.display-controls { display: none; }
+	.page { width: 100%; box-shadow: none; }
+	#doc header::before,
+	#doc section.open header::before	{
+		content: "~";
+	}
+	#doc { display: inherit }
+	#doc section:not(.open) > article,
+	#doc[ready] section:not(.open) > article {
+		display: inherit;
+	}
+}

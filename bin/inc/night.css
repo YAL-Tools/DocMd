@@ -1,0 +1,54 @@
+#night { display: none }
+label[for="night"] {
+	color: blue;
+	text-decoration: underline;
+	cursor: pointer;
+}
+#night:checked + .main {
+	background-color: #424242;
+}
+#night:checked + .main .page {
+	background-color: #1c1c1c;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+	color: white;
+}
+#night:checked + .main a,
+#night:checked + .main a:visited,
+#night:checked + .main #doc header,
+#night:checked + .main label[for="night"] {
+	color: #9DEC76;
+}
+#night:checked + .main #doc header:before,
+#night:checked + .main #doc h3 {
+	border-color: #9DEC76
+}
+#night:checked + .main #doc header,
+#night:checked + .main #doc header:hover,
+#night:checked + .main #doc article,
+#night:checked + .main #doc section,
+#night:checked + .main #doc section + p,
+#night:checked + .main #doc hr,
+#night:checked + .main #doc ul,
+#night:checked + .main #doc table,
+#night:checked + .main #doc table td,
+#night:checked + .main #doc table th
+{
+	border-color: rgba(205,225,255,0.1);
+}
+#night:checked + .main #doc header:hover,
+#night:checked + .main #doc .asset:hover {
+	background: rgba(205,225,255,0.1);
+}
+#night:checked + .main article ul li {
+	list-style-image: url('data:image/svg+xml;base256,<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="20px" height="1em" viewBox="0 0 20px 1em"><circle cx="17px" cy="0.675em" r="2px" fill="white"/></svg>'); 
+}
+#night:checked + .main pre {
+	color: #cccccc;
+	background: #000000;
+	border: 1px solid #3E4757;
+}
+#night:checked + #doc code {
+	background-color: #000;
+	border-color: #5b7c9f;
+	color: white;
+}
