@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         HTML -> [D]MD
+// @name         HTML -> DMD
 // @namespace    https://yal.cc
 // @version      0.1
 // @description  exposes a printDoc(element) function that converts HTML nodes to markdown/dmd
@@ -10,14 +10,14 @@
 // @match        https://yellowafterlife.itch.io/*
 // @grant        unsafeWindow
 // ==/UserScript==
-// Some editing is required
 
 (function() {
 	'use strict';
+    if (typeof unsafeWindow == "undefined") window.unsafeWindow = window;
 	//let doc = document.querySelector("#doc");
 	//if (!doc) return;
 	var root;
-	let dmd = document.location.href.includes("yal.cc/");
+	let dmd = true;
 	function prints(par, sep) {
 		let out = "";
 		let wasBlock = true;
@@ -28,7 +28,7 @@
 			if (wasBlock) {
 				if (!isBlock) {
 					out += sep;
-					next = next.trimLeft();
+					next = next.trimStart();
 				} else if (/(?:```|\})$/.test(out)) {
 					let sepl = sep.length;
 					if (next.substr(0, sepl) == sep && next.substr(sepl, sepl) == sep) {
@@ -36,14 +36,14 @@
 					}
 				}
 			}
-			if (isBlock) out = out.trimRight();
+			if (isBlock) out = out.trimEnd();
 			wasBlock = isBlock;
 			out += next;
 			index += 1;
 		}
-		if (/^[\r\n]/.test(out)) out = sep + out.trimLeft();
-		//if (out.charCodeAt(0) != "\n") out = sep + out.trimLeft();
-		return out.trimRight();
+		if (/^[\r\n]/.test(out)) out = sep + out.trimStart();
+		//if (out.charCodeAt(0) != "\n") out = sep + out.trimStart();
+		return out.trimEnd();
 	}
 	function print(node, sep) {
 		let out;
@@ -52,10 +52,26 @@
 			let pre = node.getElementsByTagName("pre")[0];
 			return pre ? print(pre, sep) : "";
 		}
-        else if (node.classList && (node.classList.contains("related_post") || node.classList.contains("related_post_title"))) {
+		if (dmd && nodeName == "DIV" && node.classList.contains("item")) {
+			let header = node.querySelector(":scope > .header");
+			out = sep + "#[" + prints(header, sep).trim() + "]";
+			let id = header.id;
+			if (id) {
+				let mt = /^([\w-]+)\s*[\(:]/.exec(header.innerText);
+				if (mt && mt[1] == id) {
+					out += "()";
+				} else out += `(${id})`;
+			}
+			let content = node.querySelector(":scope > .content");
+			if (content) {
+				out += ` {` + prints(content, sep + "\t") + sep + `}`;
+			} else out += "{}";
+			return out;
+		}
+        if (node.classList && (node.classList.contains("related_post") || node.classList.contains("related_post_title"))) {
 			return "";
         }
-        else switch (nodeName) {
+        switch (nodeName) {
 			case "#comment": return "";
 			case "SCRIPT":
 				if (sep == "\n") return "";
@@ -63,7 +79,7 @@
 			case "LI": {
 				let h3 = node.getElementsByTagName("h3")[0];
 				let nsep = sep + `\t`;
-				if (h3) {
+				if (h3) { // legacy dmd
 					let name = h3.innerText;
 					let id = h3.id || (/^\w+\(|^\w+/.test(name) ? "" : null);
 					if (id) {
@@ -86,7 +102,6 @@
 						out += ` {` + txt + sep + `}`;
 					} else out += ` { }`;
 				} else {
-
 					out = sep + (dmd ? `--\t` : `* `) + prints(node, nsep).trim();
 				}
 			} break;
@@ -106,7 +121,7 @@
 					out += `(` + href + `)`;
 				}
 			} break;
-			case "TT": {
+			case "TT": case "CODE": {
 				out = "`" + node.innerText.replace(/`/g, "\\`") + "`";
 			} break;
 			case "I": case "EM": {
@@ -151,7 +166,8 @@
 		}
 		return out;
 	}
-	unsafeWindow.printDoc = function(el, out) {
+	unsafeWindow.printDoc = function(el, _dmd, out) {
+		dmd = _dmd;
 		if (el) root = el;
 		if (!el) root = el = document.querySelector('.entry-content');
 		if (!el) {
@@ -170,3 +186,6 @@
 	};
 	//console.log(prints(doc.parentElement, `\n`));
 })();
+//debugger;
+let dmd = printDoc(document.querySelector("#doc"), document.querySelector(".page"));
+//for (let line of dmd.split("\n")) console.log(line);
