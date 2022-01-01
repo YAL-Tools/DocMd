@@ -168,6 +168,7 @@ class DocMdSys {
 				.replace(html, '<div class="item empty">$1</div>');
 		}
 		function preproc(html:String, depth:Int = 0):String {
+			// <!--%[if 
 			html = new EReg("<!--%\\[if\\b\\s*(.+?)\\]-->" + "([\\s\\S]*?)"
 				+ "<!--%\\[(?:"
 					+ "endif\\]-->"
@@ -185,11 +186,12 @@ class DocMdSys {
 					return otw != null ? otw : "";
 				}
 			});
-			html = ~/<!--%\[(.+?)(?:\|\|(.*?))?\]-->/g.map(html, function(rx:EReg) {
+			// <!--%[var]--> <!--%[var||fallback]-->
+			html = ~/<!--%\[(\S+?)(?:\|\|(.*?))?\]-->/g.map(html, function(rx:EReg) {
 				var id = rx.matched(1);
 				var fb = rx.matched(2);
 				if (setMap.exists(id)) {
-					return setMap[id];
+					return DocMd.render(setMap[id]);
 				} else if (fb != null) {
 					return fb;
 				} else return rx.matched(0);
