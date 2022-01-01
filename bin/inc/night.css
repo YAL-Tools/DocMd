@@ -47,7 +47,7 @@ label[for="night"] {
 	background: #000000;
 	border: 1px solid #3E4757;
 }
-#night:checked + #doc code {
+#night:checked + .main #doc code {
 	background-color: #000;
 	border-color: #5b7c9f;
 	color: white;
