@@ -85,10 +85,10 @@ body {
 #doc a.broken {
 	color: red;
 }
-#doc p {
+#doc p, .intro p {
 	margin: 0;
 }
-#doc p + p, #doc p.pad {
+#doc p + p, .intro p + p, #doc p.pad, .display-controls {
 	margin-top: 0.5em;
 }
 #doc img {
