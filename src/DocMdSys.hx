@@ -221,7 +221,7 @@ class DocMdSys {
 			return false;
 		}
 		p1 += s1.length;
-		var p2 = out.lastIndexOf(s2, p1);
+		var p2 = out.lastIndexOf(s2);
 		if (p2 < 0) {
 			Sys.println("No closing tag");
 			return false;
