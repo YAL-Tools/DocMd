@@ -238,48 +238,96 @@ class DocMdSys {
 		var fromDir = Path.directory(from);
 		return procMd(dmd, fromDir, tpl, to);
 	}
+	public static function procArgs(args:Array<String>) {
+		var extraParamsText:String = null;
+		#if macro
+		try {
+			var extraParamsPath = haxe.macro.Context.resolvePath("dmdExtraParams.txt");
+			extraParamsText = File.getContent(extraParamsPath);
+		} catch (x:Dynamic) {}
+		#else
+		try {
+			var extraParamsPath = Misc.resolve("dmdExtraParams.txt");
+			if (extraParamsPath != null) {
+				extraParamsText = File.getContent(extraParamsPath);
+			}
+		} catch (x:Dynamic) {}
+		#end
+		if (extraParamsText != null) {
+			var lines = extraParamsText.split("\n");
+			for (line in lines) {
+				line = line.trim();
+				if (line == "" || line.startsWith("#")) continue;
+				var q = new StringReader(line);
+				q.skipLineNonSpaces();
+				args.push(q.substring(0, q.pos));
+				q.skipLineSpaces();
+				while (q.loop) {
+					if (q.peek() == '"'.code) {
+						q.skip();
+						var b = new StringBuilder();
+						while (q.loop) {
+							var c = q.read();
+							if (c == '"'.code) {
+								if (q.skipIfEqu('"'.code)) { // ""
+									b.addChar('"'.code);
+								} else break;
+							} else b.addChar(c);
+						}
+						args.push(b.toString());
+					} else {
+						var start = q.pos;
+						q.skipLineNonSpaces();
+						args.push(q.substring(start, q.pos));
+					}
+					q.skipLineSpaces();
+				}
+			}
+		}
+		var i = 0, arg:String;
+		var out = { watch: false, server: -1 };
+		while (i < args.length) {
+			var remove:Int = switch (args[i]) {
+				case "--watch": out.watch = true; 1;
+				case "--server": out.watch = true; out.server = Std.parseInt(args[i + 1]); 2;
+				
+				case "--gml-api": GmlAPI.loadEntries(File.getContent(args[i + 1]));  2;
+				case "--gml-assets": GmlAPI.loadAssets(File.getContent(args[i + 1])); 2;
+				case "--gml-rx-script": HintGML.rxScript = new EReg(args[i + 1], "g"); 2;
+				case "--gml-rx-asset": HintGML.rxAsset = new EReg(args[i + 1], "g"); 2;
+				
+				case "--linear": DocMd.genMode = Linear; 1;
+				case "--visual": DocMd.genMode = Visual; 1;
+				
+				case "--include": includeList.push(args[i + 1]); 2;
+				case "--unindent": DocMdParser.trimPlainIndentation = true; 1;
+				case "--set", "-D": {
+					var pair = args[i + 1];
+					var sep = pair.indexOf("=");
+					var key:String, val:String;
+					if (sep >= 0) {
+						key = pair.substring(0, sep);
+						val = pair.substring(sep + 1);
+					} else {
+						key = pair;
+						val = "";
+					}
+					argTemplateVars[key] = val;
+					2;
+				};
+				default: 0;
+			}
+			if (remove > 0) args.splice(i, remove); else i++;
+		}
+		return out;
+	}
 	static function main() {
 		var args = Sys.args();
 		var watch = false;
-		var server = -1;
-		var hasAPI = false;
 		//
-		(function() {
-			var i = 0, arg:String;
-			while (i < args.length) {
-				var remove:Int = switch (args[i]) {
-					case "--watch": watch = true; 1;
-					case "--server": watch = true; server = Std.parseInt(args[i + 1]); 2;
-					
-					case "--gml-api": GmlAPI.loadEntries(File.getContent(args[i + 1])); hasAPI = true; 2;
-					case "--gml-assets": GmlAPI.loadAssets(File.getContent(args[i + 1])); 2;
-					case "--gml-rx-script": HintGML.rxScript = new EReg(args[i + 1], "g"); 2;
-					case "--gml-rx-asset": HintGML.rxAsset = new EReg(args[i + 1], "g"); 2;
-					
-					case "--linear": DocMd.genMode = Linear; 1;
-					case "--visual": DocMd.genMode = Visual; 1;
-					
-					case "--include": includeList.push(args[i + 1]); 2;
-					case "--unindent": DocMdParser.trimPlainIndentation = true; 1;
-					case "--set", "-D": {
-						var pair = args[i + 1];
-						var sep = pair.indexOf("=");
-						var key:String, val:String;
-						if (sep >= 0) {
-							key = pair.substring(0, sep);
-							val = pair.substring(sep + 1);
-						} else {
-							key = pair;
-							val = "";
-						}
-						argTemplateVars[key] = val;
-						2;
-					};
-					default: 0;
-				}
-				if (remove > 0) args.splice(i, remove); else i++;
-			}
-		})();
+		var argsOut = procArgs(args);
+		var watch = argsOut.watch;
+		var server = argsOut.server;
 		if (args.length > 0 && Path.extension(args[0]).toLowerCase() == "html") {
 			Sys.println("First argument should not be a HTML document.");
 			return;

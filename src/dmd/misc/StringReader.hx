@@ -71,6 +71,14 @@ using StringTools;
 			}
 		}
 	}
+	public function skipLineNonSpaces() {
+		while (loop) {
+			switch (peek()) {
+				case " ".code, "\t".code, "\r".code, "\n".code: return;
+				default: pos++;
+			}
+		}
+	}
 	public function skipIdent() {
 		while (loop) {
 			var c = peek();
