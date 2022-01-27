@@ -353,13 +353,14 @@ class DocMdAuto {
 		}
 		DocMdSys.procMd(out.toString(), Path.directory(path), outPath, outPath);
 	}
-	public static function proc(path:String, ?outPath:String) {
+	public static function proc(path:String, ?outPath:String, ?args:Array<String>) {
 		#if !display
 		var out = new StringBuf();
 		Context.onAfterTyping(function(types) {
 			onAfterTyping(types, path, out);
 		});
 		Context.onAfterGenerate(function() {
+			DocMdSys.procArgs(args != null ? args : []);
 			onAfterGenerate(path, outPath, out);
 		});
 		#end
