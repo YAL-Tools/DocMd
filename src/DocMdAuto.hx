@@ -80,22 +80,22 @@ class DocMdAuto {
 			return !meta.has(":noDoc") && (tdoc || meta.has(":doc") || meta.has(":expose"));
 		}
 		function add(id:String, title:String, meta:MetaAccess, doc:String, pos:Position) {
-			var fch = DocMdAutoExtract.dmdPath(meta, mt);
+			var fieldDocPath = DocMdAutoExtract.dmdPath(meta, mt);
 			var rd = [doc != null ?
 				DocMdAutoExtract.docPreproc(rxDocStart.replace(doc, ""), bt)
 			: null];
 			if (DocMdAutoExtract.docMeta(rd, "@dmdResetPath") != null) {
 				tpar = tparOrig;
 			}
-			if (fch == null) fch = DocMdAutoExtract.docPath(rd, "@dmdPath");
-			if (fch == null) {
-				fch = DocMdAutoExtract.docPath(rd, "@dmdSetPath");
-				if (fch == null) fch = DocMdAutoExtract.dmdSetPath(meta);
-				if (fch != null) tpar = DocMdAutoBuilder.find(fch, pos);
+			if (fieldDocPath == null) fieldDocPath = DocMdAutoExtract.docPath(rd, "@dmdPath");
+			if (fieldDocPath == null) {
+				fieldDocPath = DocMdAutoExtract.docPath(rd, "@dmdSetPath");
+				if (fieldDocPath == null) fieldDocPath = DocMdAutoExtract.dmdSetPath(meta);
+				if (fieldDocPath != null) tpar = DocMdAutoBuilder.find(fieldDocPath, pos);
 			}
 			var fpar;
-			if (fch != null) {
-				fpar = DocMdAutoBuilder.find(fch, pos);
+			if (fieldDocPath != null) {
+				fpar = DocMdAutoBuilder.find(fieldDocPath, pos);
 			} else {
 				if (tpar == null) tpar = DocMdAutoBuilder.find(DocMdAutoExtract.dmdPath(bt.meta, mt), bt.pos);
 				fpar = tpar;
