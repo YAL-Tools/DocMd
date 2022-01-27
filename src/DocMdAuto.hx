@@ -163,7 +163,10 @@ class DocMdAuto {
 						var an = arg.name;
 						if (an == null || an == "") {
 							tb.add("\\_");
-						} else tb.add(an);
+						} else {
+							while (an.startsWith("_")) an = an.substring(1);
+							tb.add(an.replace("_", "\\_"));
+						}
 					}
 					tb.add(")");
 					var rtd = DocMdAutoExtract.docMeta(rfd, "@return");
