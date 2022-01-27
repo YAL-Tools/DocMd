@@ -71,6 +71,7 @@ class DocMdAuto {
 					btOrder = or(DocMdAutoExtract.docFloat(rbtd, "@dmdOrder"), btOrder);
 					tpar.text = cct(tpar.text, rbtd[0]);
 				}
+				if (btOrder != null) tpar.order = btOrder;
 			} else tpar = null;
 			tparOrig = tpar;
 			return (bt.isExtern || bt.meta.has(":std")) && !tdoc;
