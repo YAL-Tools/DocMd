@@ -20,6 +20,7 @@ class DocMdAuto {
 	public static var fqMap:Map<String, ModuleType>;
 	public static var packageMap:Map<String, Map<String, ModuleType>>;
 	public static var sectionMap:Map<String, DocMdAutoSection>;
+	public static var isGMS23:Bool;
 	
 	static function or<T>(a:T, b:T):T {
 		return a != null ? a : b;
@@ -137,9 +138,11 @@ class DocMdAuto {
 					tb.add(title);
 					if (kind == InstVar) {
 						if (!btStruct) {
-							tb.add(":index:script");
-						} else tb.add(":script");
-					} else if (kind == StaticVar) tb.add(":script");
+							tb.add(isGMS23 ? ":index:function" : ":index:script");
+						} else tb.add(isGMS23 ? ":function" : ":script");
+					} else if (kind == StaticVar) {
+						tb.add(isGMS23 ? ":function" : ":script");
+					}
 					tb.add("(");
 					var sep = false;
 					if (kind == InstFunc && !btStruct) {
@@ -261,15 +264,20 @@ class DocMdAuto {
 		var template = File.getContent(dmdPath);
 		var gml_variant = -1;
 		#if (sfgml)
-			#if (sfgml.modern && !sfgml_linear)
+			#if (sfgml.modern || sfgml_version >= "2.3")
+			isGMS23 = true;
+			#else
+			isGMS23 = false;
+			#end
+			if (isGMS23) {
 				#if sfgml_snake_case
 				gml_variant = 1;
 				#else
 				gml_variant = 2;
 				#end
-			#else
-				gml_variant = 0;
-			#end
+			} else gml_variant = 0;
+		#else
+			isGMS23 = null;
 		#end
 		if (gml_variant >= 0) {
 			template = '```set gml_variant $gml_variant```\r\n'
