@@ -29,7 +29,7 @@ class DocMdAutoResolver {
 		}
 		return null;
 	}
-	public static function resolveField(mt:ModuleType, id:String):DocMdAutoResolverPair {
+	public static function resolveField(mt:ModuleType, id:String, full:Bool):DocMdAutoResolverPair {
 		if (mt != null) switch (mt) {
 			case TClassDecl(_.get() => ct): {
 				var isStruct = DocMdAutoExtract.metaStruct(ct.meta);
@@ -42,8 +42,12 @@ class DocMdAutoResolver {
 				}
 				var fields = ct.fields.get();
 				for (fd in fields) if (fd.name == id) {
+					var name:String;
+					if (!full && DocMdAutoExtract.metaStruct(ct.meta)) {
+						name = fd.name;
+					} else name = DocMdAutoType.printFieldPath(fd.name, InstVarFQ, fd.meta, ct);
 					return {
-						name: DocMdAutoType.printFieldPath(fd.name, InstVarFQ, fd.meta, ct),
+						name: name,
 						id: DocMdAutoType.printFieldPath(fd.name, Flat, fd.meta, ct),
 					};
 				}
@@ -69,7 +73,7 @@ class DocMdAutoResolver {
 	public static function mapOne(id:String, emt:ModuleType):DocMdAutoResolverPair {
 		if (DocMdAuto.sectionMap[id] != null) return null;
 		//
-		var fds = resolveField(emt, id);
+		var fds = resolveField(emt, id, false);
 		if (fds != null) return fds;
 		//
 		var bt = DocMdAutoType.baseTypeForModuleType(emt);
@@ -87,7 +91,7 @@ class DocMdAutoResolver {
 		var bt = DocMdAutoType.baseTypeForModuleType(emt);
 		var mt = resolveType(at, bt != null ? bt.pack : null);
 		if (mt != null) {
-			return resolveField(mt, fd);
+			return resolveField(mt, fd, true);
 		} else { // well OK, might be a FQ type path
 			var mt = DocMdAuto.fqMap[at + "." + fd];
 			if (mt != null) {
