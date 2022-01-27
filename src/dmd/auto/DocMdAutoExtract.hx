@@ -84,7 +84,7 @@ class DocMdAutoExtract {
 		#end
 	}
 	public static function metaDotStatic(t:BaseType):Bool {
-		#if ((sfgml.modern || sfgml_version >= "2.3") && (!sfgml_dot_static || sfgml_dot_static != 0))
+		#if ((sfgml.modern || sfgml_version >= "2.3") && (!sfgml_dot_static || (sfgml_dot_static != "0" && sfgml_dot_static != "false")))
 		return !t.isExtern || t.meta.has(":gml.dot_static");
 		#else
 		return false;
