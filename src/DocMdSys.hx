@@ -29,7 +29,9 @@ class DocMdSys {
 		return full.startsWith(dir) ? full : null;
 	}
 	public static function timeOf(path:String):Float {
-		return FileSystem.stat(path).mtime.getTime();
+		if (FileSystem.exists(path)) {
+			return FileSystem.stat(path).mtime.getTime();
+		} else return 0;
 	}
 	public static var lastOutput:String = "";
 	public static var lastOutputTime:Float = 0;
