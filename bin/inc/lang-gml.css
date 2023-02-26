@@ -16,6 +16,16 @@ pre.gmlmd .uv { color: #000 } /* user var */
 pre.gmlmd .lv { color: #648 } /* local var */
 pre.gmlmd .fd { color: #804 } /* field */
 
+pre.gmlmd a.uf {
+	background-color: #f7f0ff;
+}
+pre.gmlmd a.kw {
+	background-color: #f0f7ff;
+}
+pre.gmlmd a.sf, #doc pre a.sv {
+	background-color: #fff3f0;
+}
+
 #night:checked + .main pre.gmlmd .op { color: #CCCCCC }
 #night:checked + .main pre.gmlmd .co { color: #5B995B }
 #night:checked + .main pre.gmlmd .kw { color: #FFB871 }

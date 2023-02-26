@@ -152,15 +152,6 @@ body {
 #doc pre a {
 	text-decoration: none;
 }
-#doc pre a.uf {
-	background-color: #f7f0ff;
-}
-#doc pre a.kw {
-	background-color: #f0f7ff;
-}
-#doc pre a.sf, #doc pre a.sv {
-	background-color: #fff3f0;
-}
 #doc pre a:hover {
 	text-decoration: underline;
 }
