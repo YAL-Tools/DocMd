@@ -29,7 +29,9 @@ class DocMdSys {
 		return full.startsWith(dir) ? full : null;
 	}
 	public static function timeOf(path:String):Float {
-		return FileSystem.stat(path).mtime.getTime();
+		if (FileSystem.exists(path)) {
+			return FileSystem.stat(path).mtime.getTime();
+		} else return 0;
 	}
 	public static var lastOutput:String = "";
 	public static var lastOutputTime:Float = 0;
@@ -162,10 +164,11 @@ class DocMdSys {
 		html = ~/<p>\s*<\/p>/g.replace(html, "");
 		html = ~/(\r?\n[ \t]*)(\r?\n[ \t]*)(<\/p><p>)/g.replace(html, "$1$3$2");
 		if (DocMd.genMode == Nested) {
-			html = ~/<div class="item">(<span class="header">.+?<\/span>)<div class="content"><\/div><\/div>/g
-				.replace(html, '<div class="item empty">$1</div>');
-			html = ~/<div class="item">(<a class="header"[^>]*>.+?<\/a>)<div class="content"><\/div><\/div>/g
-				.replace(html, '<div class="item empty">$1</div>');
+			// fold empty sections:
+			html = ~/<section>(<header.*?>.+?<\/header>)<article><\/article><\/section>/g
+				.replace(html, '<section class="empty">$1</section>');
+			// get rid of empty Uncategorized section in particular:
+			html = html.replace('<section class="empty"><header id="uncategorized"><a href="#uncategorized" title="(permalink)">Uncategorized</a></header></section>', '');
 		}
 		function preproc(html:String, depth:Int = 0):String {
 			// <!--%[if 

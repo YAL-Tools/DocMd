@@ -1,9 +1,7 @@
-#night { display: none }
-label[for="night"] {
-	color: blue;
-	text-decoration: underline;
+.main label[for="night"] {
 	cursor: pointer;
 }
+#night { display: none }
 #night:checked + .main {
 	background-color: #424242;
 }

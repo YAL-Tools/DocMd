@@ -81,6 +81,9 @@ class TagExecAPI {
 			#end
 		};
 		g["StringBufExt"] = StringBufExt;
+		
+		g["Bytes"] = haxe.io.Bytes;
+		g["Base64"] = haxe.crypto.Base64;
 		#if sys
 		g["File"] = {
 			getContent: getContent,

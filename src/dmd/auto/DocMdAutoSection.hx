@@ -1,5 +1,6 @@
 package dmd.auto;
 import haxe.macro.Type.ModuleType;
+using StringTools;
 
 /**
  * ...
@@ -15,13 +16,30 @@ class DocMdAutoSection extends DocMdAutoEl {
 		this.id = id;
 	}
 	override public function print(out:StringBuf):Void {
+		var isVar = id != null && DocMdAuto.injectableSections.exists(id);
+		var _out:StringBuf;
+		if (isVar) {
+			_out = out;
+			out = new StringBuf();
+		} else _out = null;
 		if (prefix != null && prefix != "") out.add(prefix + "\n");
 		if (id != null || title != null) {
-			out.add('#[$title]($id) {\n');
-			super.print(out);
+			var tb = new StringBuf();
+			super.print(tb);
+			var ts = tb.toString();
+			var isEmpty = ts.trim() == "";
+			if (isEmpty && order == 0x7FffFFff) return;
+			out.add('#[$title]($id) {');
+			if (!isEmpty) { out.add("\n"); out.add(ts); }
 			out.add('}\n');
 		} else super.print(out);
 		if (suffix != null && suffix != "") out.add(suffix + "\n");
+		if (isVar) {
+			var s = out.toString().rtrim().replace("\n", "\n\t");
+			_out.add('```setmd $id\n');
+			_out.add("\t" + s);
+			_out.add('\n```\n');
+		}
 	}
 	override public function toString():String {
 		return '#[$title]($id){' + children.length + '}';
