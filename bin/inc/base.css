@@ -46,11 +46,14 @@ body {
 	padding-top: 1px;
 	padding-bottom: 1px;
 	cursor: pointer;
+	display: flex;
+	align-items: center;
 }
 #doc header a {
 	outline: none;
 	text-decoration: none;
 	color: #458;
+	word-break: break-word;
 }
 #doc header::before {
 	display: inline-block;
@@ -64,8 +67,7 @@ body {
 	border-radius: 50%;
 	margin-right: 4px;
 	vertical-align: middle;
-	position: relative;
-	top: -1px;
+	flex-shrink: 0;
 }
 #doc section.open > header::before {
 	content: "-";
