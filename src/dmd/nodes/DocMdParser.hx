@@ -206,7 +206,17 @@ class DocMdParser {
 						permalink = permalink.substring(0, clSep);
 					}
 					
-					// allow #[section](-prefix), #[section](+suffix)
+					/**
+					#[Category](+cat) {
+						#[Item 1](-i1) {}
+						#[Item 2](-i2) {}
+					}
+					acts like 
+					#[Category](cat) {
+						#[Item 1](cat-i1) {}
+						#[Item 2](cat-i2) {}
+					}
+					**/
 					var idState = 0;
 					switch (permalink.charCodeAt(0)) {
 						case "+".code:

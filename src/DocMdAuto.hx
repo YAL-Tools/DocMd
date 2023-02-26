@@ -7,6 +7,7 @@ import haxe.macro.PositionTools;
 import haxe.macro.Type;
 import haxe.macro.Expr;
 import dmd.misc.StringBuilder;
+import sys.FileSystem;
 import sys.io.File;
 import dmd.auto.*;
 import dmd.auto.DocMdAutoFieldKind;
@@ -20,6 +21,7 @@ class DocMdAuto {
 	public static var fqMap:Map<String, ModuleType>;
 	public static var packageMap:Map<String, Map<String, ModuleType>>;
 	public static var sectionMap:Map<String, DocMdAutoSection>;
+	public static var injectableSections:Map<String, Bool>;
 	public static var isGMS23:Bool;
 	
 	static function or<T>(a:T, b:T):T {
@@ -309,6 +311,11 @@ class DocMdAuto {
 		fqMap = new Map();
 		packageMap = new Map();
 		sectionMap = new Map();
+		injectableSections = new Map();
+		~/%\[(\w+)\]/g.map(template, function(rx:EReg) {
+			injectableSections[rx.matched(1)] = true;
+			return rx.matched(0);
+		});
 		for (type in types) {
 			var bt:BaseType = DocMdAutoType.baseTypeForModuleType(type);
 			if (bt == null) continue;
@@ -351,7 +358,9 @@ class DocMdAuto {
 		} else if (Path.extension(outPath) == "") {
 			outPath += ".html";
 		}
-		DocMdSys.procMd(out.toString(), Path.directory(path), outPath, outPath);
+		var dir = Path.directory(path);
+		if (!FileSystem.exists(dir)) FileSystem.createDirectory(dir);
+		DocMdSys.procMd(out.toString(), dir, outPath, outPath);
 	}
 	public static function proc(path:String, ?outPath:String, ?args:Array<String>) {
 		#if !display
