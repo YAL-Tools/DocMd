@@ -2,7 +2,7 @@
 pre.gmlmd .md { color: #7A81A9 } /* #define */
 pre.gmlmd .kw { color: #008; font-weight: bold } /* keyword */
 pre.gmlmd .co { color: #080 } /* comment */
-pre.gmlmd .nu { color: #00f } /* number */
+pre.gmlmd .nu { color: #F03232 } /* number */
 pre.gmlmd .nx { color: #00f } /* hex */
 pre.gmlmd .st { color: #00f } /* string */
 pre.gmlmd .ts { color: #00f } /* template string */
