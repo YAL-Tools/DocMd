@@ -166,9 +166,19 @@ class DocMd {
 			}
 			#end
 			setMap.set(name, code);
-			dmd = dmd.replace("%[" + name + "]", code);
 			//trace(name, code, dmd);
 		});
+		for (name => code in setMap) {
+			for (i in 0 ... 32) {
+				var _code = code;
+				for (name2 => code2 in setMap) {
+					code = code.replace("%[" + name2 + "]", code2);
+				}
+				if (code == _code) break;
+			}
+			setMap[name] = code;
+			dmd = dmd.replace("%[" + name + "]", code);
+		}
 		var defCode = setMap["tag:defcode"];
 		TagCode.defaultKind = defCode;
 		if (defCode != null) setMap["tag:" + defCode] = "1";
