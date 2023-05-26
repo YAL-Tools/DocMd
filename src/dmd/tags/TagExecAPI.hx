@@ -39,6 +39,8 @@ class TagExecAPI {
 		g["Reflect"] = Reflect;
 		g["EReg"] = EReg;
 		g["StringBuf"] = StringBuf;
+		g["Date"] = Date;
+		g["DateTools"] = DateTools;
 		
 		g["trace"] = Reflect.makeVarArgs(function(args:Array<Dynamic>) {
 			var r:String = null;
