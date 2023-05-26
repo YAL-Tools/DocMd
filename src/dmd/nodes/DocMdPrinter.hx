@@ -30,7 +30,7 @@ class DocMdPrinter {
 			case SepLine:
 				buf.addString("<hr/>");
 			case Bold(nodes):
-				printNodesInTag(nodes, "b");
+				printNodesInTag(nodes, "strong");
 			case Italic(nodes):
 				printNodesInTag(nodes, "i");
 			case Strike(nodes):
@@ -71,6 +71,8 @@ class DocMdPrinter {
 				buf.add('</a>');
 			case InlineCode(text):
 				buf.addFormat("<code>%s</code>", StringTools.htmlEscape(text));
+			case InlineImage(src, alt):
+				buf.addFormat('<img src="%s" alt="%s"/>', src, StringTools.htmlEscape(alt, true));
 			case Code(kind, text):
 				TagCode.add(buf, kind, text);
 			case Section(depth, title, permalink, meta, children): {
