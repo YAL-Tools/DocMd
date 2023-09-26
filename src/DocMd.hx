@@ -140,22 +140,26 @@ class DocMd {
 		});
 		return rs;
 	}
-	public static function renderExt(dmd:String, ?fromDir:String, ?setMap:Map<String, String>) {
-		if (setMap == null) setMap = new Map();
-		
-		new EReg("^[ \t]*```(\\w+)", "gm").each(dmd, function(r:EReg) {
+	
+	public static function collectVariables(dmd:String, setMap:Map<String, String>, ?fromDir:String) {
+		// ```gml ...``` sets "tag:gml" variable and so on:
+		static var rxCode = new EReg("^[ \t]*```(\\w+)", "gm");
+		rxCode.each(dmd, function(r:EReg) {
 			var tag = r.matched(1);
 			setMap["tag:" + tag] = "1";
 		});
-		new EReg("^([ \t]*)```set(?:md)?"
+		
+		static var rxSet = new EReg("^([ \t]*)```set(?:md)?"
 			+ "\\s+(\\S+)" // name
 			+ "(?"
 				+ "|[ \t]*(.*)```" // ```set name value```
 				+ "|\\s+([\\s\\S]*?)^\\1```" // multi-line
-		+ ")", "gm").each(dmd, function(r:EReg) {
+		+ ")", "gm");
+		rxSet.each(dmd, function(r:EReg) {
 			var name = r.matched(2);
 			var code = r.matched(3).trim();
 			#if sys
+			// `set name ./path` to store file contents in a variable
 			if (fromDir != null && code.indexOf("\n") < 0 && code.startsWith("./")) {
 				var rel = code.substring(2);
 				code = Misc.getText(rel, fromDir);
@@ -168,8 +172,9 @@ class DocMd {
 			setMap.set(name, code);
 			//trace(name, code, dmd);
 		});
+		
 		for (name => code in setMap) {
-			for (i in 0 ... 32) {
+			for (i in 0 ... 32) { // variables with variables inside
 				var _code = code;
 				for (name2 => code2 in setMap) {
 					code = code.replace("%[" + name2 + "]", code2);
@@ -177,12 +182,15 @@ class DocMd {
 				if (code == _code) break;
 			}
 			setMap[name] = code;
+		}
+	}
+	
+	public static function patchVariables(dmd:String, setMap:Map<String, String>, fromDir:String) {
+		for (name => code in setMap) {
 			dmd = dmd.replace("%[" + name + "]", code);
 		}
-		var defCode = setMap["tag:defcode"];
-		TagCode.defaultKind = defCode;
-		if (defCode != null) setMap["tag:" + defCode] = "1";
 		
+		// %[./path] to inject a file on-spot
 		#if sys
 		if (fromDir != null) dmd = new EReg("(^\\s+)?%\\[\\./(.+?)\\]", "gm").map(dmd, function(r:EReg) {
 			var rel = r.matched(2);
@@ -199,6 +207,17 @@ class DocMd {
 			}
 		});
 		#end
+		return dmd;
+	}
+	
+	public static function renderExt(dmd:String, ?fromDir:String, ?setMap:Map<String, String>) {
+		if (setMap == null) setMap = new Map();
+		collectVariables(dmd, setMap, fromDir);
+		
+		dmd = patchVariables(dmd, setMap, fromDir);
+		var defCode = setMap["tag:defcode"];
+		TagCode.defaultKind = defCode;
+		if (defCode != null) setMap["tag:" + defCode] = "1";
 		
 		//trace(dmd);
 		if (setMap.exists("autobr")) DocMd.autoBR = true;

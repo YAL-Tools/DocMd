@@ -125,6 +125,7 @@ class DocMdAutoExtract {
 		}
 	}
 	public static function docPreproc(docText:String, t:BaseType):String {
+		docText = DocMd.patchVariables(docText, DocMdAutoResolver.templateVars, DocMdAutoResolver.templateDir);
 		var typeMeta = t.meta;
 		if (metaStruct(typeMeta)) {
 			docText = ~/```gml:linear[\s\S]*?```/g.replace(docText, "");

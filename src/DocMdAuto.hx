@@ -262,7 +262,7 @@ class DocMdAuto {
 	}
 	
 	static var dmdFullPath:String;
-	static function onAfterTyping(types:Array<ModuleType>, path:String, out:StringBuf) {
+	static function onAfterTyping(types:Array<ModuleType>, dir:String, path:String, out:StringBuf) {
 		var dmdPath = path;
 		if (Path.extension(dmdPath) == "") dmdPath += ".dmd";
 		if (!Path.isAbsolute(dmdPath)) dmdPath = Context.resolvePath(dmdPath);
@@ -336,6 +336,11 @@ class DocMdAuto {
 			mts[bt.name] = type;
 		}
 		//
+		DocMdAutoResolver.templateVars = new Map();
+		DocMdAutoResolver.templateDir = dir;
+		DocMd.collectVariables(template, DocMdAutoResolver.templateVars, dir);
+		//for (k => v in DocMdAutoResolver.templateVars) trace(k, Json.stringify(v));
+		//
 		DocMdAutoBuilder.root = new DocMdAutoSection(null, null);
 		for (type in types) procType(type);
 		DocMdAutoResolver.seekRec(DocMdAutoBuilder.root);
@@ -352,7 +357,11 @@ class DocMdAuto {
 		out.add(template.substring(p2));
 		//File.saveContent("temp.dmd", out.toString());
 	}
-	static function onAfterGenerate(path:String, outPath:String, out:StringBuf) {
+	static function onAfterGenerate(path:String, dir:String, outPath:String, out:StringBuf) {
+		DocMdSys.procMd(out.toString(), dir, outPath, outPath);
+	}
+	public static function proc(path:String, ?outPath:String, ?args:Array<String>) {
+		#if !display
 		if (outPath == null) {
 			outPath = Path.withExtension(dmdFullPath, "html");
 		} else if (Path.extension(outPath) == "") {
@@ -360,17 +369,14 @@ class DocMdAuto {
 		}
 		var dir = Path.directory(path);
 		if (!FileSystem.exists(dir)) FileSystem.createDirectory(dir);
-		DocMdSys.procMd(out.toString(), dir, outPath, outPath);
-	}
-	public static function proc(path:String, ?outPath:String, ?args:Array<String>) {
-		#if !display
+		
 		var out = new StringBuf();
 		Context.onAfterTyping(function(types) {
-			onAfterTyping(types, path, out);
+			onAfterTyping(types, dir, path, out);
 		});
 		Context.onAfterGenerate(function() {
 			DocMdSys.procArgs(args != null ? args : []);
-			onAfterGenerate(path, outPath, out);
+			onAfterGenerate(path, dir, outPath, out);
 		});
 		#end
 	}

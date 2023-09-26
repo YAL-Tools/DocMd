@@ -100,6 +100,8 @@ class DocMdAutoResolver {
 			} else return null;
 		}
 	}
+	public static var templateVars:Map<String, String>;
+	public static var templateDir:String;
 	public static function proc(text:String, emt:ModuleType):String {
 		//
 		text = ~/\[([A-Za-z_]\w*)\]/g.map(text, function(rx:EReg) {
