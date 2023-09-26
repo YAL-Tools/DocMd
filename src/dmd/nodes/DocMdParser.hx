@@ -26,7 +26,7 @@ class DocMdParser {
 	static function makeID(s:String) {
 		s = s.replace(" ", "-");
 		s = s.replace("'", "");
-		s = ~/[^\w-_]/g.replace(s, "");
+		s = ~/[^\w\-_]/g.replace(s, "");
 		return s;
 	}
 	
@@ -161,7 +161,7 @@ class DocMdParser {
 				start = reader.pos;
 			};
 			case "!".code if (reader.peek(1) == "[".code): { // ![alt](url.png)
-				flushSkip(out);
+				flushSkip(out, 2);
 				var alt = reader.readTillAfter("]".code);
 				if (reader.skipIfEqu("(".code)) {
 					var src = reader.readTillAfter(")".code);
@@ -229,7 +229,7 @@ class DocMdParser {
 					
 					// auto-generate permalink if blank
 					if (permalink == "") {
-						var rx = ~/^([\w-]+)\s*[\(:]/g;
+						var rx = ~/^([\w\-]+)\s*[\(:]/g;
 						var text = title.toPlainText();
 						if (rx.match(text)) {
 							permalink = rx.matched(1);

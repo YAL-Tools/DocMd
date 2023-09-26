@@ -41,7 +41,7 @@ class DocMd {
 	public static function makeID(s:String) {
 		s = s.replace(" ", "-");
 		s = s.replace("'", "");
-		s = ~/[^\w-_]/g.replace(s, "");
+		s = ~/[^\w\-_]/g.replace(s, "");
 		return s;
 	}
 	public static function render(dmd:String) {
