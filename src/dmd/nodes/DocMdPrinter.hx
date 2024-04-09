@@ -59,7 +59,7 @@ class DocMdPrinter {
 						url = url.substring(1);
 					}
 					if (rels.length > 0) buf.addFormat(' rel="%s"', rels.join(" "));
-					if (~/^[\w_\-% ]+$/g.match(url)) url = "#" + DocMd.makeID(url);
+					if (~/^[\w\.\-% ]+$/g.match(url)) url = "#" + DocMd.makeID(url);
 					buf.addFormat(' href="%s">', url);
 					printNodes(nodes);
 					buf.add('</a>');

@@ -41,7 +41,7 @@ class DocMd {
 	public static function makeID(s:String) {
 		s = s.replace(" ", "-");
 		s = s.replace("'", "");
-		s = ~/[^\w\-_]/g.replace(s, "");
+		s = ~/[^\w\.\-_]/g.replace(s, "");
 		return s;
 	}
 	public static function render(dmd:String) {
@@ -110,14 +110,16 @@ class DocMd {
 			var sep = rx.matched(++mi);
 			var c2 = rx.matched(++mi);
 			var w2 = rx.matched(++mi);
-			var ff = w1 + "_" + w2;
-			if (sections.exists(ff)) {
-				c1 = procAutoAPI(c1);
-				c2 = procAutoAPI(c2);
-				return (sections.exists(w1)
-					? '<a class="$c1" href="#$w1">$w1</a>'
-					: '<span class="$c1">$w1</span>') + sep
-					+ '<a class="$c2" href="#$ff">$w2</a>';
+			for (step in 0 ... 2) {
+				var ff = w1 + (step == 0 ? "_" : ".") + w2;
+				if (sections.exists(ff)) {
+					c1 = procAutoAPI(c1);
+					c2 = procAutoAPI(c2);
+					return (sections.exists(w1)
+						? '<a class="$c1" href="#$w1">$w1</a>'
+						: '<span class="$c1">$w1</span>') + sep
+						+ '<a class="$c2" href="#$ff">$w2</a>';
+				}
 			}
 			return rx.matched(0);
 		});
