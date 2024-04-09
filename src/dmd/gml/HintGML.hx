@@ -1,6 +1,6 @@
 package dmd.gml;
 import dmd.gml.GmlAPI;
-import dmd.misc.LuaAPI;
+import dmd.misc.*;
 import haxe.ds.Map;
 import dmd.misc.StringBuilder;
 import dmd.misc.StringReader;
@@ -19,9 +19,11 @@ class HintGML {
 	static var mode:GMLMode = GML;
 	static inline var bss = 92; // backslash
 	static function parseSub(q:StringReader, tokens:Array<GmlToken>, tplStart:Int):Void {
+		var isGML = mode == GML;
 		var isLua = mode == Lua;
-		var keywords = isLua ? LuaAPI.keywords : GmlAPI.keywords;
-		var builtin = isLua ? new Map() : GmlAPI.builtin;
+		var isAHK = mode == AHK;
+		var keywords = isAHK ? AHKAPI.keywords : (isLua ? LuaAPI.keywords : GmlAPI.keywords);
+		var builtin = isLua || isAHK ? new Map() : GmlAPI.builtin;
 		var start:Int, c:Int, c1:Int;
 		var i:Int, s:String;
 		inline function add(tk:GmlToken):Void {
@@ -83,12 +85,16 @@ class HintGML {
 				case "#".code: { // #define #macro #
 					while (q.loop) {
 						c = q.peek();
-						if (c >= "a".code && c <= "z".code) {
+						if (c >= "a".code && c <= "z".code
+							|| isAHK && c >= "A".code && c <= "Z".code
+						) {
 							q.skip();
 						} else break;
 					}
 					s = q.substring(start, q.pos);
-					switch (s) {
+					if (isAHK) {
+						add(Meta(s));
+					} else switch (s) {
 						case "#define": add(Define);
 						case "#macro": add(Macro);
 						case "#region", "#endregion": {
@@ -104,6 +110,16 @@ class HintGML {
 						};
 						default: q.pos = start + 1; add(Op("#"));
 					}
+				};
+				case ";".code if (isAHK): {
+					q.skip();
+					while (q.loop) {
+						switch (q.peek()) {
+							case "\r".code, "\n".code: { }; // ->
+							default: q.skip(); continue;
+						}; break;
+					}
+					add(Comment(q.substring(start, q.pos)));
 				};
 				case "?".code, ":".code, "~".code, ";".code, ",".code: {
 					addOp();
@@ -149,7 +165,7 @@ class HintGML {
 					addOp();
 				};
 				case "/".code: switch (q.peek()) {
-					case "/".code: {
+					case "/".code if (isGML): {
 						q.skip();
 						while (q.loop) {
 							switch (q.peek()) {
@@ -159,7 +175,7 @@ class HintGML {
 						}
 						add(Comment(q.substring(start, q.pos)));
 					};
-					case "*".code: {
+					case "*".code if (isGML): {
 						q.skip();
 						while (q.loop) {
 							if (q.peek() == "*".code) {
@@ -288,7 +304,7 @@ class HintGML {
 								skipIdent();
 								if (q.pos > start) add(Global(q.substring(start, q.pos)));
 							}
-						} else if (keywords.exists(s)) {
+						} else if (keywords.exists(s) || isAHK && keywords.exists(s.toLowerCase())) {
 							add(Keyword(s));
 						} else {
 							i = q.pos;
@@ -599,9 +615,13 @@ class HintGML {
 	}
 }
 
+/**
+ * Some languages are sufficiently akin to GML to reuse the highlighter with minor changes.
+ */
 enum GMLMode {
 	GML;
 	Lua;
+	AHK;
 }
 
 enum GmlToken {

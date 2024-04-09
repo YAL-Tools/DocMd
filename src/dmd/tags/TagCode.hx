@@ -115,6 +115,11 @@ class TagCode {
 				code = procCode(HintGML.proc(code, "lua", true, null, Lua));
 				r.addString(code);
 			};
+			case "ahk": {
+				HintGML.version = 2;
+				code = procCode(HintGML.proc(code, "ahk", true, null, AHK));
+				r.addString(code);
+			};
 			case "raw": {
 				r.addString(code);
 			};

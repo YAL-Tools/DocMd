@@ -1,0 +1,53 @@
+/* AutoHotKey */
+pre.ahk .md { color: #7A81A9 } /* #define */
+pre.ahk .kw { color: #008; font-weight: bold } /* keyword */
+pre.ahk .co { color: #080 } /* comment */
+pre.ahk .nu { color: #F03232 } /* number */
+pre.ahk .nx { color: #00f } /* hex */
+pre.ahk .st { color: #00f } /* string */
+pre.ahk .ts { color: #00f } /* template string */
+pre.ahk .op { color: #000 } /* operator */
+pre.ahk .cb { color: #008; font-weight: bold } /* curly brace */
+pre.ahk .sv { color: #800 } /* std func */
+pre.ahk .sf { color: #800 } /* std var */
+pre.ahk .ri { color: #0078aa } /* assets */
+pre.ahk .uf { color: #808 } /* user func */
+pre.ahk .lv { color: #648 } /* local var */
+pre.ahk .uv { color: #804 } /* user var */
+pre.ahk .fd { color: #804 } /* field */
+
+pre.ahk a.uf {
+	background-color: #f7f0ff;
+}
+pre.ahk a.kw {
+	background-color: #f0f7ff;
+}
+pre.ahk a.sf, #doc pre a.sv {
+	background-color: #fff3f0;
+}
+
+#night:checked + .main pre.ahk .op { color: #CCCCCC }
+#night:checked + .main pre.ahk .co { color: #5B995B }
+#night:checked + .main pre.ahk .kw { color: #FFB871 }
+#night:checked + .main pre.ahk .md { color: #FFB871 }
+#night:checked + .main pre.ahk .cb { color: #FFB871 }
+#night:checked + .main pre.ahk .sf { color: #FFB871 }
+#night:checked + .main pre.ahk .uf { color: #FFB871 }
+#night:checked + .main pre.ahk .nu { color: #FF8080 }
+#night:checked + .main pre.ahk .st { color: #FCF320 }
+#night:checked + .main pre.ahk .ts { color: #FF8080 }
+#night:checked + .main pre.ahk .sv { color: #FF8080 }
+#night:checked + .main pre.ahk .gv { color: #FF80FF }
+#night:checked + .main pre.ahk .ri { color: #FF8080 }
+#night:checked + .main pre.ahk .lv { color: #FFF899 }
+#night:checked + .main pre.ahk .uv { color: #B2B1FF }
+#night:checked + .main pre.ahk .fd { color: #B2B1FF }
+
+#night:checked + .main pre.ahk a.uf,
+#night:checked + .main pre.ahk a.kw,
+#night:checked + .main pre.ahk a.sf {
+	background-color: #431;
+}
+#night:checked + .main pre.ahk a.sv {
+	background-color: #422;
+}
