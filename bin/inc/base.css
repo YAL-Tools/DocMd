@@ -76,9 +76,11 @@ body {
 #doc section.empty > header::before {
 	content: " "; /*"·"*/
 }
-#doc header:hover {
-	border-left-color: #f3f3f3;
-	background: #f3f3f3;
+
+#doc header:hover,
+#doc .sticky-side:hover {
+	border-left-color: #E7E7E7; /* rgba(0, 0, 0, 0.05) */
+	background: rgba(0, 0, 0, 0.048);
 }
 #doc header .ret-arrow {
 	font-weight: normal;
@@ -111,6 +113,32 @@ body {
 #doc article {
 	padding-top: 0.25em;
 	padding-bottom: 0.5em;
+	position: relative;
+}
+#doc .sticky-side {
+	position: absolute;
+	left: -2px;
+	top: 0;
+	bottom: 1px;
+	width: 20px;
+	writing-mode: vertical-rl;
+	font-size: 85%;
+	text-orientation: sideways;
+}
+#doc .sticky-side,
+#doc .sticky-side:visited {
+	color: rgba(0, 0, 0, 0.3);
+}
+#doc .sticky-side > span {
+	display: inline-block;
+	position: sticky;
+	left: 0;
+	top: 0;
+	padding: 0.3em 0;
+	max-height: 100%;
+	box-sizing: border-box;
+	overflow: hidden;
+	white-space: nowrap;
 }
 #doc tt {
 	font-weight: bold;

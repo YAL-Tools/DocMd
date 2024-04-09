@@ -1,4 +1,4 @@
-<html lang="en"><head>
+<!DOCTYPE HTML><html lang="en"><head>
 <meta charset="UTF-8">
 <title><!--%[title||untitled]--></title>
 <meta name="viewport" content="width=device-width" />
@@ -39,6 +39,9 @@ if (document.location.host == "yal.cc" && location.protocol == "http:") {
 <!--%[if tag:lua]-->
 <style type="text/css" id="lang_lua">/*[include inc/lang-lua.css]*/</style>
 <!--%[endif]-->
+<!--%[if tag:ahk]-->
+<style type="text/css" id="lang_ahk">/*[include inc/lang-ahk.css]*/</style>
+<!--%[endif]-->
 <style type="text/css" id="night_css">/*[include inc/night.css]*/</style>
 <style type="text/css" id="print_css">/*[include inc/print.css]*/</style>
 <noscript><style>/*[include inc/noscript.css]*/</style></noscript>
@@ -47,14 +50,15 @@ if (document.location.host == "yal.cc" && location.protocol == "http:") {
 <div class="main <!--%[mainclass||]-->">
 <script type="text/javascript">/*[include inc/night.js]*/</script>
 <main class="page">
-<section class="intro"><!--%[intro]--></section><section class="display-controls">
-<!--%[if !linear]--><!--%[quick-display-intro||Click on sections to expand/collapse them.]--><br><!--%[endif]-->
-<!--%[quick-display-controls||Quick display controls:]-->
+<section class="intro"><!--%[md:intro]--></section>
+<section class="display-controls">
+<!--%[if !linear]--><!--%[md:quick-display-intro||Click on sections to expand/collapse them.]--><br><!--%[endif]-->
+<!--%[md:quick-display-controls||Quick display controls:]-->
 <!--%[if !linear]-->
-<a href="javascript:void(0)" onclick="opt_none(); return false"><!--%[quick-display-categories||Categories]--></a>
-&middot; <a href="javascript:void(0)" onclick="opt_list(); return false"><!--%[quick-display-sections||Sections]--></a>
-&middot; <a href="javascript:void(0)" onclick="opt_all(); return false"><!--%[quick-display-everything||Everything]--></a>
-&middot; <!--%[endif]--><a href="javascript:void(0)"><label for="night"><!--%[quick-display-nightmode||Toggle night mode]--></label></a><br/>
+<a href="javascript:void(0)" onclick="opt_none(); return false"><!--%[md:quick-display-categories||Categories]--></a>
+&middot; <a href="javascript:void(0)" onclick="opt_list(); return false"><!--%[md:quick-display-sections||Sections]--></a>
+&middot; <a href="javascript:void(0)" onclick="opt_all(); return false"><!--%[md:quick-display-everything||Everything]--></a>
+&middot; <!--%[endif]--><a href="javascript:void(0)"><label for="night"><!--%[md:quick-display-nightmode||Toggle night mode]--></label></a><br/>
 </section><section id="doc">
 <!--<doc--><!--doc>-->
 </section></main></div>

@@ -33,4 +33,12 @@ class DocMdNodeTools {
 		for (node in nodes) if (isBlock(node)) return true;
 		return false;
 	}
+	public static function hasSections(nodes:Array<DocMdNode>):Bool {
+		for (node in nodes) {
+			if (node.match(Section(_, _, _, _))) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

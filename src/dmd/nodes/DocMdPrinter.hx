@@ -108,6 +108,18 @@ class DocMdPrinter {
 						}
 						buf.add(tagHtml);
 						buf.add('</header><article>');
+						
+						if (children.hasSections() && permalink != null) {
+							buf.addFormat('<a class="sticky-side"');
+							if (permalink != null) {
+								buf.addFormat(' href="#%s"', permalink);
+							}
+							var title = title.toPlainText().htmlEscape(true);
+							buf.addFormat(' title="%s">', title);
+							buf.addFormat('<span>%s</span>', title);
+							buf.add('</a>');
+						}
+						
 						printNodes(children, true);
 						buf.add('</article></section>');
 					};
