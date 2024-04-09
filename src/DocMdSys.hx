@@ -190,11 +190,14 @@ class DocMdSys {
 				}
 			});
 			// <!--%[var]--> <!--%[var||fallback]-->
-			html = ~/<!--%\[(\S+?)(?:\|\|(.*?))?\]-->/g.map(html, function(rx:EReg) {
-				var id = rx.matched(1);
-				var fb = rx.matched(2);
+			html = ~/<!--%\[(md:)?(\S+?)(?:\|\|(.*?))?\]-->/g.map(html, function(rx:EReg) {
+				var isMd = rx.matched(1) != null;
+				var id = rx.matched(2);
+				var fb = rx.matched(3);
 				if (setMap.exists(id)) {
-					return DocMd.render(setMap[id]);
+					var value = setMap[id];
+					if (isMd) return DocMd.render(value);
+					return value;
 				} else if (fb != null) {
 					return fb;
 				} else return rx.matched(0);
