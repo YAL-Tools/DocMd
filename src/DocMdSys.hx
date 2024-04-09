@@ -23,7 +23,7 @@ using dmd.MiscTools;
  * @author YellowAfterlife
  */
 class DocMdSys {
-	public static var dir:String;
+	public static var dir:String = null;
 	public static function expandPath(path:String):String {
 		var full = Path.normalize(dir + "/" + path);
 		return full.startsWith(dir) ? full : null;
@@ -291,7 +291,7 @@ class DocMdSys {
 			}
 		}
 		var i = 0, arg:String;
-		var out = { watch: false, server: -1 };
+		var out = { watch: false, server: -1, dir: null };
 		while (i < args.length) {
 			var remove:Int = switch (args[i]) {
 				case "--watch": out.watch = true; 1;
@@ -321,6 +321,7 @@ class DocMdSys {
 					argTemplateVars[key] = val;
 					2;
 				};
+				case "--dir": out.dir = args[i + 1]; 2;
 				default: 0;
 			}
 			if (remove > 0) args.splice(i, remove); else i++;
@@ -369,9 +370,11 @@ class DocMdSys {
 			tpl = nx + ".dmd.html";
 			to = nx + ".html";
 		} else if (to == null) to = tpl;
-		dir = Path.directory(from);
-		if (dir == "") dir = Sys.getCwd();
+		
+		dir = argsOut.dir ?? Path.directory(from);
 		dir = Path.normalize(dir);
+		if (dir == "") dir = Path.normalize(Sys.getCwd());
+		
 		var time = 0.;
 		var time_tpl = 0.;
 		if (!watch) {
