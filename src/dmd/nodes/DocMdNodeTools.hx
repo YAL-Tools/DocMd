@@ -22,7 +22,7 @@ class DocMdNodeTools {
 	public static function isBlock(node:DocMdNode):Bool {
 		return switch (node) {
 			case Code(_, _): true;
-			case Section(_, _, _, _): true;
+			case Section(_): true;
 			case SepLine: true;
 			case NestList(kind, pre, items): true;
 			default: false;
@@ -35,7 +35,7 @@ class DocMdNodeTools {
 	}
 	public static function hasSections(nodes:Array<DocMdNode>):Bool {
 		for (node in nodes) {
-			if (node.match(Section(_, _, _, _))) {
+			if (node.match(Section(_))) {
 				return true;
 			}
 		}

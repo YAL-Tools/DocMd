@@ -11,8 +11,10 @@ using StringTools;
  * @author YellowAfterlife
  */
 class DocMdPrinter {
+	public static var current:DocMdPrinter = null;
 	var buf = new StringBuilder();
-	var sectionDepth = 0;
+	public var sectionDepth = 0;
+	public var sectionStack:Array<DocMdSection> = [];
 	static var isBlock = ~/^\s*<(?:div|p|section|header|footer|pre|h1|h2|h3|h4)\b/;
 	function new() {
 		//
@@ -75,7 +77,13 @@ class DocMdPrinter {
 				buf.addFormat('<img src="%s" alt="%s"/>', src, StringTools.htmlEscape(alt, true));
 			case Code(kind, text):
 				TagCode.add(buf, kind, text);
-			case Section(depth, title, permalink, meta, children): {
+			case Section(section): {
+				var depth = section.depth;
+				var title = section.title;
+				var permalink = section.permalink;
+				var meta = section.meta;
+				var children = section.children;
+				//
 				var _depth = sectionDepth;
 				var tags = meta == null ? [] : ~/,\s*/g.split(meta);
 				var hasTags = tags.length > 0;
@@ -85,7 +93,9 @@ class DocMdPrinter {
 				var tagHtml = hasTags ? '<span class="tags">' + tags.map(function(s) {
 					return '<span class="tag-' + DocMd.makeID(s) + '">$s</span>';
 				}).join("") + '</span>' : '';
+				//
 				sectionDepth = (depth < 0) ? _depth + 1 : depth;
+				sectionStack.push(section);
 				switch (DocMd.genMode) {
 					case Nested: {
 						buf.addString('<section');
@@ -150,6 +160,8 @@ class DocMdPrinter {
 						printNodes(children, true);
 					};
 				}
+				//
+				sectionStack.pop();
 				sectionDepth = _depth;
 			};
 			case NestList(kind, pre, items): {
@@ -225,8 +237,10 @@ class DocMdPrinter {
 	}
 	public static function print(nodes:Array<DocMdNode>) {
 		var printer = new DocMdPrinter();
+		var prev = current; current = printer;
 		//trace(nodes.join("\n"));
 		printer.printNodes(nodes);
+		current = prev;
 		return printer.buf.toString();
 	}
 }

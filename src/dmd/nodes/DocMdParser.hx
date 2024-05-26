@@ -217,29 +217,31 @@ class DocMdParser {
 						#[Item 2](cat-i2) {}
 					}
 					**/
-					var idState = 0;
-					switch (permalink.charCodeAt(0)) {
-						case "+".code:
-							idState = 1;
-							permalink = permalink.substring(1);
-						case "-".code:
-							idState = 2;
-							permalink = permalink.substring(1);
+					var pmFirstChar = permalink.length > 0 ? permalink.charAt(0) : null;
+					var pmFirstSpec = pmFirstChar != null && "+-_.".contains(pmFirstChar);
+					if (pmFirstSpec) {
+						permalink = permalink.substring(1);
 					}
 					
 					// auto-generate permalink if blank
 					if (permalink == "") {
-						var rx = ~/^([\w\-\.]+)\s*[\(:]/g;
+						static var rxAuto = new EReg("^"
+							+ "(" + "[\\w\\-\\.]+" + ")" // a_b-c.d
+							+ "\\s*" + "[\\(:=]" // f() / v:t / c = 0
+						, "");
 						var text = title.toPlainText();
-						if (rx.match(text)) {
-							permalink = rx.matched(1);
+						if (rxAuto.match(text)) {
+							permalink = rxAuto.matched(1);
 						} else permalink = makeID(text);
 					}
 					
 					//
-					switch (idState) {
-						case 1: sectionPrefix = permalink;
-						case 2: permalink = sectionPrefix + "." + permalink;
+					if (pmFirstSpec) {
+						if (pmFirstChar == "+") {
+							sectionPrefix = permalink;
+						} else {
+							permalink = sectionPrefix + pmFirstChar + permalink;
+						}
 					}
 				} else permalink = null;
 				//
@@ -257,7 +259,8 @@ class DocMdParser {
 				//
 				reader.readTillAfter("{".code);
 				var children = readNodesTillAfter("}");
-				out.push(Section(-1, title, permalink, meta, children));
+				var section = new DocMdSection( -1, title, permalink, meta, children);
+				out.push(Section(section));
 				start = reader.pos;
 			};
 			case "#".code if (reader.peek(1) == "#".code && reader.peek(2) == "{".code): {// ##{ OL }
@@ -285,7 +288,8 @@ class DocMdParser {
 				} else {
 					title = readNodesTillAfter("\n");
 				}
-				out.push(Section(hn, title, id, null, []));
+				var section = new DocMdSection(hn, title, id, null, []);
+				out.push(Section(section));
 				start = reader.pos;
 			};
 			case "`".code if (reader.peek(1) == "`".code && reader.peek(2) == "`".code): {

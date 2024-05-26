@@ -1,4 +1,5 @@
 package dmd.tags;
+import dmd.nodes.DocMdPrinter;
 import haxe.Rest;
 import haxe.io.Path;
 import hscript.Interp;
@@ -9,6 +10,7 @@ import sys.io.File;
  * @author YellowAfterlife
  */
 class TagExecAPI {
+	public static var global:Map<String, Dynamic> = null;
 	public static function init(interp:Interp) {
 		function getContent(path:String):String {
 			var dir = DocMdSys.dir;
@@ -78,6 +80,8 @@ class TagExecAPI {
 			addCodeTag: function(name:String, hdl:String->Dynamic) {
 				TagCode.customTags.set(name, hdl);
 			},
+			printer: null,
+			sectionStack: null,
 			#if sys
 			vars: DocMdSys.templateVars,
 			#end
@@ -92,6 +96,7 @@ class TagExecAPI {
 			awaitChanges: awaitChanges
 		};
 		#end
+		global = g;
 	}
 }
 

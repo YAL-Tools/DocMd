@@ -54,6 +54,12 @@ class TagExec {
 	
 	public static function exec(s:String) {
 		prepare();
+		var global = dmd.tags.TagExecAPI.global;
+		if (global != null) {
+			var printer = dmd.nodes.DocMdPrinter.current;
+			global["DocMd"].printer = printer;
+			global["DocMd"].sectionStack = printer.sectionStack;
+		}
 		// we do a little wiggle to allow nested calls
 		var last = next;
 		next = new StringBuf();
