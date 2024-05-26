@@ -29,7 +29,8 @@ body {
 	margin: 0;
 }
 #doc blockquote { margin: 0.5em 0; padding: 0; }
-#doc article > ul, #doc article > ol {
+#doc article > ul, #doc li > ul,
+#doc article > ol, #doc li > ol {
 	padding-left: 20px;
 }
 #doc article ul li {
@@ -106,7 +107,10 @@ body {
 	border-bottom: 1px solid #ccc;
 }
 
-#doc article, #doc ul, #doc blockquote {
+#doc article,
+#doc ul,
+#doc ol,
+#doc blockquote {
 	padding-left: 20px;
 	border-left: 2px solid #f3f3f3;
 }
@@ -124,6 +128,7 @@ body {
 	writing-mode: vertical-rl;
 	font-size: 85%;
 	text-orientation: sideways;
+	/*transform: rotate(0.05deg);*/
 }
 #doc .sticky-side,
 #doc .sticky-side:visited {
