@@ -435,7 +435,21 @@ class HintGML {
 		var length = tokens.length;
 		var scripts = new Map<String, Bool>();
 		for (pos in 0 ... length) {
-			if (tokens[pos].match(Define|Macro)) switch (tokens[pos + 2]) {
+			var isMacro = switch (tokens[pos]) {
+				case Define: false;
+				case Macro: true;
+				default: continue;
+			}
+			var nameAt = pos + 2;
+			if (isMacro && tokens[pos + 3].match(Op(":"))) {
+				// I guess highlight the configuration in the same color too:
+				switch (tokens[nameAt]) {
+					case Ident(s): scripts.set(s, true);
+					default:
+				}
+				nameAt += 2;
+			}
+			switch (tokens[nameAt]) {
 				case Ident(s): scripts.set(s, true);
 				default:
 			}
@@ -500,6 +514,9 @@ class HintGML {
 						case ParClose: break;
 						default:
 					}
+				};
+				case Script(s): {
+					if (locals.exists(s)) tokens[pos] = Local(s);
 				};
 				case Ident(s): {
 					if (locals.exists(s)) {
