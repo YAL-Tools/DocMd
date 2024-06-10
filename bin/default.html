@@ -50,7 +50,10 @@ if (document.location.host == "yal.cc" && location.protocol == "http:") {
 <div class="main <!--%[mainclass||]-->">
 <script type="text/javascript">/*[include inc/night.js]*/</script>
 <main class="page">
-<section class="intro"><!--%[md:intro]--></section>
+<section class="intro">
+<!--%[if intro_title]--><h1 style='transform: skewX(-5deg); margin: 0.5em 0;'><!--%[md:intro_title]--></h1><!--%[endif]-->
+<!--%[md:intro]-->
+</section>
 <section class="display-controls">
 <!--%[if !linear]--><!--%[md:quick-display-intro||Click on sections to expand/collapse them.]--><br><!--%[endif]-->
 <!--%[md:quick-display-controls||Quick display controls:]-->
