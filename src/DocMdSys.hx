@@ -351,15 +351,30 @@ class DocMdSys {
 				args.push(arg3);
 			}
 		}
-		if (args.length < 2) {
-			Sys.println("Use: ");
-			Sys.println("docmd [doc.dmd] (modifies doc.html)");
-			Sys.println("docmd [doc.dmd] [to.html] (modifies to.html)");
-			Sys.println("docmd [doc.dmd] [template.dmd.html] [to.html] (rewrites s to.html)");
-			Sys.println("Optionals:");
-			Sys.println("--watch: Watch for file changes");
-			Sys.println("--api [path]: Load API from non-standard fnames");
-			Sys.println("--assets [path]: Load asset list");
+		if (args.length < 1) {
+			var e = "    ";
+			var lines = [
+				"Use: ",
+				"docmd doc.dmd", e+"Modifies DMD section inside doc.html",
+				"docmd doc.dmd to.html", e+"Modifies DMD section inside to.html",
+				"docmd doc.dmd template.dmd.html to.html", e+"Uses a template, rewrites to.html",
+				"",
+				"Options:",
+				"--watch", e+"Stays around and re-runs after file changes",
+				"--server <port>", e+"Opens a simple web server and watches for file changes",
+				"--set <var>, --set <var>=<value>", e+"Changes a variable",
+				"--include <path>", e+"Prepends a DMD file to the content",
+				"--dir <dir>", e+"Overrides the directory to look for referenced files in",
+				"--linear", e+"Enables non-nested section mode for blog posts",
+				//"--visual", e+"Enables text adventure generation mode",
+				"",
+				"GameMaker-specific:",
+				"--gml-api <path>", e+"Load API from a custom fnames file",
+				"--gml-assets <path>", e+"Load an asset list from a file",
+				"--gml-rx-script <regex>", e+"Changes regex for script names",
+				"--gml-rx-asset <regex>", e+"Changes regex for asset names",
+			];
+			for (line in lines) Sys.println(line);
 			return;
 		}
 		var from = args[0];
