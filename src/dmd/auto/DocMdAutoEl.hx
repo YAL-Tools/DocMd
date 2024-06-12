@@ -40,6 +40,7 @@ class DocMdAutoEl {
 			children[i].sortRec();
 		}
 		children.sort(sortRecProc);
+		//for (c in children) trace(c.order, c);
 	}
 	public function toString():String {
 		return '`$text`';

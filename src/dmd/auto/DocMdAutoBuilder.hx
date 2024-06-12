@@ -19,7 +19,9 @@ class DocMdAutoBuilder {
 			var next:DocMdAutoSection;
 			inline function checkAutoOrder(id:String):Void {
 				var ord = autoOrder[id];
-				if (ord != null) next.order = ord;
+				if (ord != null) {
+					next.order = ord;
+				}
 			}
 			if (Std.is(item, String)) {
 				next = cur.idMap[item];

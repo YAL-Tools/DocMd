@@ -64,8 +64,12 @@ class DocMdAuto {
 				if (tpar.moduleType == null) tpar.moduleType = mt;
 				
 				//
+				var section = DocMdAutoExtract.docMeta(rbtd, "@section");
+				if (section != null) {
+					tpar.prefix = cct(tpar.prefix, section + ":");
+				}
 				tpar.prefix = cct(tpar.prefix, DocMdAutoExtract.docMeta(rbtd, "@dmdPrefix"));
-				tpar.suffix = cct(tpar.suffix, DocMdAutoExtract.docMeta(rbtd, "@dmdPrefix"));
+				tpar.suffix = cct(tpar.suffix, DocMdAutoExtract.docMeta(rbtd, "@dmdSuffix"));
 				
 				//
 				if (rbtd != null) {
@@ -121,7 +125,16 @@ class DocMdAuto {
 			}
 			if (order != null) sct.order = order;
 			//
-			sct.prefix = or(DocMdAutoExtract.docMeta(rd, "@dmdPrefix"), DocMdAutoExtract.metaString(meta, ":dmdPrefix"));
+			var section = DocMdAutoExtract.docMeta(rd, "@section");
+			if (section != null) {
+				if (section != "") {
+					section += ":";
+				} else section = "---";
+				sct.prefix = cct(sct.prefix, section);
+			}
+			//
+			sct.prefix = cct(sct.prefix, DocMdAutoExtract.docMeta(rd, "@dmdPrefix"));
+			sct.prefix = cct(sct.prefix, DocMdAutoExtract.metaString(meta, ":dmdPrefix"));
 			sct.suffix = or(DocMdAutoExtract.docMeta(rd, "@dmdSuffix"), DocMdAutoExtract.metaString(meta, ":dmdSuffix"));
 			sct.title = title;
 			sct.text = or(DocMdAutoExtract.metaString(meta, ":dmdText"), rd[0]);
@@ -300,19 +313,21 @@ class DocMdAuto {
 		DocMdAutoBuilder.autoOrder = new Map();
 		var rxOrder = ~/```set\s+dmdOrder\b([\s\S]+?)```/;
 		if (rxOrder.match(template)) {
-			var ind = 0;
+			var list = [];
 			~/(\b[a-zA-Z][\w-]*)(?::(\d+))?/g.map(rxOrder.matched(1), function(rx:EReg):String {
-				var id = rx.matched(1);
-				DocMdAutoBuilder.autoOrder[id] = ++ind;
+				list.push(rx.matched(1));
 				return rx.matched(0);
 			});
+			for (i => id in list) {
+				DocMdAutoBuilder.autoOrder[id] = -1 + i / list.length;
+			}
 		}
 		//
 		fqMap = new Map();
 		packageMap = new Map();
 		sectionMap = new Map();
 		injectableSections = new Map();
-		~/%\[(\w+)\]/g.map(template, function(rx:EReg) {
+		DocMd.rxVarRef.map(template, function(rx:EReg) {
 			injectableSections[rx.matched(1)] = true;
 			return rx.matched(0);
 		});
