@@ -164,9 +164,6 @@ class DocMdSys {
 		html = ~/<p>\s*<\/p>/g.replace(html, "");
 		html = ~/(\r?\n[ \t]*)(\r?\n[ \t]*)(<\/p><p>)/g.replace(html, "$1$3$2");
 		if (DocMd.genMode == Nested) {
-			// fold empty sections:
-			html = ~/<section>(<header.*?>.+?<\/header>)<article><\/article><\/section>/g
-				.replace(html, '<section class="empty">$1</section>');
 			// get rid of empty Uncategorized section in particular:
 			html = html.replace('<section class="empty"><header id="uncategorized"><a href="#uncategorized" title="(permalink)">Uncategorized</a></header></section>', '');
 		}

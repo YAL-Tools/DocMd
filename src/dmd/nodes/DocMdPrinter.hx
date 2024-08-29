@@ -99,6 +99,13 @@ class DocMdPrinter {
 				switch (DocMd.genMode) {
 					case Nested: {
 						buf.addString('<section');
+						var isEmpty = children.length == 0;
+						if (isEmpty) {
+							hasTags = true;
+							if (tagClass != "") {
+								tagClass += " empty";
+							} else tagClass = "empty";
+						}
 						if (hasTags) buf.addFormat(' class="%s"', tagClass);
 						buf.addString('><header');
 						if (permalink != null) {
@@ -117,21 +124,27 @@ class DocMdPrinter {
 							buf.add('</span>');
 						}
 						buf.add(tagHtml);
-						buf.add('</header><article>');
+						buf.add('</header>');
 						
-						if (children.hasSections() && permalink != null) {
-							buf.addFormat('<a class="sticky-side"');
-							if (permalink != null) {
-								buf.addFormat(' href="#%s"', permalink);
+						if (!isEmpty) {
+							buf.add('<article>');
+							
+							if (children.hasSections() && permalink != null) {
+								buf.addFormat('<a class="sticky-side"');
+								if (permalink != null) {
+									buf.addFormat(' href="#%s"', permalink);
+								}
+								var title = title.toPlainText().htmlEscape(true);
+								buf.addFormat(' title="%s">', title);
+								buf.addFormat('<span>%s</span>', title);
+								buf.add('</a>');
 							}
-							var title = title.toPlainText().htmlEscape(true);
-							buf.addFormat(' title="%s">', title);
-							buf.addFormat('<span>%s</span>', title);
-							buf.add('</a>');
+							
+							printNodes(children, true);
+							buf.add('</article>');
 						}
 						
-						printNodes(children, true);
-						buf.add('</article></section>');
+						buf.add('</section>');
 					};
 					case Visual: {
 						buf.addFormat('<div');
