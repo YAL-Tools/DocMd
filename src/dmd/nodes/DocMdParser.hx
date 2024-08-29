@@ -410,6 +410,20 @@ class DocMdParser {
 				out.push(Exec(hx));
 				start = reader.pos;
 			};
+			case "$".code if (reader.peek(1) == "[".code): { // $[func], $[func](arg)
+				flushSkip(out, 2);
+				var func = reader.readTillAfter("]".code);
+				var hx;
+				if (reader.skipIfEqu("(".code)) {
+					start = reader.pos;
+					var arg = reader.readTillAfter(")".code);
+					hx = func + '(' + haxe.Json.stringify(arg) + ');';
+				} else {
+					hx = func + "();";
+				}
+				out.push(Exec(hx));
+				start = reader.pos;
+			};
 			case "%".code if (reader.peek(1) == "{".code): {
 				flushSkip(out, 2);
 				for (node in readNodesTillAfter("}")) out.push(node);
