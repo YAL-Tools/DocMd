@@ -270,6 +270,21 @@ class HintGML {
 					if (q.loop) q.skip();
 					add(TString(q.substring(start, q.pos)));
 				} else add(Spaces("`"));
+				case "$".code if (q.peek() == '"'.code): {
+					q.skip();
+					c1 = q.peek();
+					while (q.loop) {
+						q.skip();
+						if (c1 == '"'.code) break;
+						if (c1 == "{".code) {
+							add(TString(q.substring(start, q.pos)));
+							parseSub(q, tokens, q.pos);
+							start = q.pos;
+						}
+						c1 = q.peek();
+					}
+					add(TString(q.substring(start, q.pos)));
+				};
 				case ".".code: {
 					add(Op("."));
 					start = q.pos;
@@ -281,96 +296,99 @@ class HintGML {
 						add(Field(q.substring(start, q.pos)));
 					}
 				};
-				default: {
-					if(c >= "a".code && c <= "z".code
+				case _ if (c >= "a".code && c <= "z".code
 					|| c >= "A".code && c <= "Z".code
-					|| c == "_".code) {
-						skipIdent();
-						s = q.substring(start, q.pos);
-						if (s == "global") {
-							add(Keyword(s));
+					|| c == "_".code
+				): { // ident
+					skipIdent();
+					s = q.substring(start, q.pos);
+					if (s == "global") {
+						add(Keyword(s));
+						start = q.pos;
+						skipSpace();
+						if (q.pos > start) add(Spaces(q.substring(start, q.pos)));
+						if (q.peek() == ".".code) {
+							add(Op("."));
+							q.skip();
+							//
 							start = q.pos;
 							skipSpace();
 							if (q.pos > start) add(Spaces(q.substring(start, q.pos)));
-							if (q.peek() == ".".code) {
-								add(Op("."));
-								q.skip();
-								//
-								start = q.pos;
-								skipSpace();
-								if (q.pos > start) add(Spaces(q.substring(start, q.pos)));
-								//
-								start = q.pos;
-								skipIdent();
-								if (q.pos > start) add(Global(q.substring(start, q.pos)));
-							}
-						} else if (keywords.exists(s) || isAHK && keywords.exists(s.toLowerCase())) {
-							add(Keyword(s));
-						} else {
-							i = q.pos;
-							while (i < q.length) {
-								switch (q.get(i)) {
-									case " ".code, "\t".code, "\r".code, "\n".code: {
-										i += 1; continue;
-									};
-									default: { }; // ->
-								}; break;
-							}
-							if (q.get(i) == "(".code) {
-								add(builtin.exists(s) ? Func(s) : Script(s));
-							} else if (builtin.exists(s)) {
-								add(Builtin(s));
-							} else if (GmlAPI.assets.exists(s)) {
+							//
+							start = q.pos;
+							skipIdent();
+							if (q.pos > start) add(Global(q.substring(start, q.pos)));
+						}
+					} else if (keywords.exists(s) || isAHK && keywords.exists(s.toLowerCase())) {
+						add(Keyword(s));
+					} else {
+						i = q.pos;
+						while (i < q.length) {
+							switch (q.get(i)) {
+								case " ".code, "\t".code, "\r".code, "\n".code: {
+									i += 1; continue;
+								};
+								default: { }; // ->
+							}; break;
+						}
+						if (q.get(i) == "(".code) {
+							add(builtin.exists(s) ? Func(s) : Script(s));
+						} else if (builtin.exists(s)) {
+							add(Builtin(s));
+						} else if (GmlAPI.assets.exists(s)) {
+							add(Asset(s));
+						} else if (start > 0 && q.get(start - 1) != ".".code) {
+							if (rxScript.match(s)) {
+								add(Script(s));
+							} else if (rxAsset.match(s)) {
 								add(Asset(s));
-							} else if (start > 0 && q.get(start - 1) != ".".code) {
-								if (rxScript.match(s)) {
-									add(Script(s));
-								} else if (rxAsset.match(s)) {
-									add(Asset(s));
-								} else add(Ident(s));
 							} else add(Ident(s));
-						}
+						} else add(Ident(s));
 					}
-					else if (c >= "0".code && c <= "9".code || c == ".".code || c == "$".code) {
-						var kind = 0;
-						switch (c) {
-							case "0".code: {
-								if (q.get(q.pos) == "x".code) {
-									q.pos += 1;
-									kind = 1;
-								}
-							};
-							case "$".code: kind = 1;
-							case ".".code: {
-								c1 = q.get(q.pos);
-								if (c1 < "0".code || c1 > "9".code) kind = -1;
+				};
+				case _ if (c >= "0".code && c <= "9".code
+					|| c == ".".code || c == "$".code
+				): { // number
+					var kind = 0;
+					switch (c) {
+						case "0".code: {
+							if (q.get(q.pos) == "x".code) {
+								q.pos += 1;
+								kind = 1;
 							}
-						}
-						switch (kind) {
-							case -1: add(Op("."));
-							case 1: {
-								while (q.loop) {
-									c = q.peek();
-									if(c >= "0".code && c <= "9".code
-									|| c >= "A".code && c <= "F".code
-									|| c >= "a".code && c <= "f".code) {
-										q.pos += 1;
-									} else break;
-								}
-								add(Number(q.substring(start, q.pos)));
-							};
-							default: {
-								while (q.loop) {
-									c = q.peek();
-									if (c == ".".code || c >= "0".code && c <= "9".code) {
-										q.pos += 1;
-									} else break;
-								}
-								add(Number(q.substring(start, q.pos)));
-							};
+						};
+						case "$".code: kind = 1;
+						case ".".code: {
+							c1 = q.get(q.pos);
+							if (c1 < "0".code || c1 > "9".code) kind = -1;
 						}
 					}
-					else add(Spaces(String.fromCharCode(c)));
+					switch (kind) {
+						case -1: add(Op("."));
+						case 1: {
+							while (q.loop) {
+								c = q.peek();
+								if(c >= "0".code && c <= "9".code
+								|| c >= "A".code && c <= "F".code
+								|| c >= "a".code && c <= "f".code) {
+									q.pos += 1;
+								} else break;
+							}
+							add(Number(q.substring(start, q.pos)));
+						};
+						default: {
+							while (q.loop) {
+								c = q.peek();
+								if (c == ".".code || c >= "0".code && c <= "9".code) {
+									q.pos += 1;
+								} else break;
+							}
+							add(Number(q.substring(start, q.pos)));
+						};
+					}
+				};
+				default: {
+					add(Spaces(String.fromCharCode(c)));
 				};
 			}
 		}
