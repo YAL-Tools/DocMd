@@ -29,6 +29,10 @@ class DocMdAutoSection extends DocMdAutoEl {
 			var ts = tb.toString();
 			var isEmpty = ts.trim() == "";
 			if (isEmpty && order == 0x7FffFFff) return;
+			if (title == null) {
+				title = id;
+				//trace("uh oh", this);
+			}
 			out.add('#[$title]($id) {');
 			if (!isEmpty) { out.add("\n"); out.add(ts); }
 			out.add('}\n');

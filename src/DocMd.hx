@@ -187,10 +187,18 @@ class DocMd {
 		}
 	}
 	
+	public static var rxVarRef = new EReg("%\\[(\\w+)" // %[var]
+		+ "(?:" + "\\|\\|(.*?)" + ")?" // %[var||def]
+	+ "\\]", "g");
 	public static function patchVariables(dmd:String, setMap:Map<String, String>, fromDir:String) {
-		for (name => code in setMap) {
-			dmd = dmd.replace("%[" + name + "]", code);
-		}
+		dmd = rxVarRef.map(dmd, function(rx) {
+			var name = rx.matched(1);
+			var val = setMap[name];
+			if (val != null) return val;
+			var def = rx.matched(2);
+			if (def != null) return def;
+			return rx.matched(0);
+		});
 		
 		// %[./path] to inject a file on-spot
 		#if sys
