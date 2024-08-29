@@ -28,9 +28,16 @@ class TagExecAPI {
 			var setMap:Map<String, String> = null, cwd:String = null;
 			#if sys
 			setMap = DocMdSys.templateVars;
+			var hadNavMenu = setMap.exists("navmenu");
+			var navMenu = hadNavMenu ? setMap["navmenu"] : null;
+			if (hadNavMenu) setMap.remove("navmenu");
 			cwd = DocMdSys.currentDir;
 			#end
-			return DocMd.renderExt(dmd, null, setMap);
+			var result = DocMd.renderExt(dmd, null, setMap);
+			#if sys
+			if (hadNavMenu) setMap["navmenu"] = navMenu;
+			#end
+			return result;
 		}
 		var g = interp.variables;
 		// std:

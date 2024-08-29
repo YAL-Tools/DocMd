@@ -5,8 +5,10 @@
 #night:checked + .main {
 	background-color: #424242;
 }
-#night:checked + .main .page {
+#night:checked + .main .page,
+#night:checked + .main .navmenu {
 	background-color: #1c1c1c;
+	border-color: #1c1c1c;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 	color: white;
 }
@@ -28,6 +30,7 @@
 #night:checked + .main #doc section + p,
 #night:checked + .main #doc hr,
 #night:checked + .main #doc ul,
+#night:checked + .main #doc ol,
 #night:checked + .main #doc table,
 #night:checked + .main #doc table td,
 #night:checked + .main #doc table th

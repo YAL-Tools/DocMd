@@ -4,6 +4,7 @@ import dmd.Misc;
 import dmd.WebServer;
 import dmd.gml.GmlAPI;
 import dmd.gml.HintGML;
+import dmd.misc.DocMdNav;
 import dmd.nodes.DocMdParser;
 import haxe.io.Path;
 import dmd.misc.StringReader;
@@ -69,7 +70,9 @@ class DocMdSys {
 		}
 		
 		//
+		setMap["toplevel"] = "true";
 		var html = DocMd.renderExt(dmd, fromDir, setMap);
+		setMap.remove("toplevel");
 		if (setMap.exists("template")) {
 			tplPath = setMap["template"];
 			var _tpl = Misc.resolve(tplPath);
@@ -223,16 +226,35 @@ class DocMdSys {
 		var s2 = "<!--doc>-->";
 		var p1 = out.indexOf(s1);
 		if (p1 < 0) {
-			Sys.println("No opening tag");
+			Sys.println("No opening doc tag");
 			return false;
 		}
 		p1 += s1.length;
 		var p2 = out.lastIndexOf(s2);
 		if (p2 < 0) {
-			Sys.println("No closing tag");
+			Sys.println("No closing doc tag");
 			return false;
 		}
 		out = out.substring(0, p1) + html + out.substring(p2);
+		//
+		if (setMap.exists("navmenu")) {
+			var s1 = "<!--<navmenu-->";
+			var s2 = "<!--navmenu>-->";
+			var p1 = out.indexOf(s1);
+			if (p1 < 0) {
+				Sys.println("No opening navmenu tag");
+				return false;
+			}
+			p1 += s1.length;
+			var p2 = out.lastIndexOf(s2);
+			if (p2 < 0) {
+				Sys.println("No closing navmenu tag");
+				return false;
+			}
+			var navhtml = DocMdNav.latest;
+			out = out.substring(0, p1) + navhtml + out.substring(p2);
+		}
+		//
 		lastOutput = out;
 		lastOutputTime = Sys.time();
 		File.saveContent(to, out);

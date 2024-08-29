@@ -1,4 +1,5 @@
 package;
+import dmd.misc.DocMdNav;
 import dmd.nodes.DocMdParser;
 import dmd.nodes.DocMdPrinter;
 import dmd.tags.TagCode;
@@ -44,10 +45,13 @@ class DocMd {
 		s = ~/[^\w\.\-_]/g.replace(s, "");
 		return s;
 	}
-	public static function render(dmd:String) {
+	public static function render(dmd:String, navmenu:Bool = false) {
 		var nodes = DocMdParser.parse(dmd);
 		var oldStyle = TagCode.nextStyle;
 		TagCode.nextStyle = null;
+		if (navmenu) {
+			DocMdNav.print(nodes);
+		}
 		var html = DocMdPrinter.print(nodes);
 		html = postfix(html);
 		TagCode.nextStyle = oldStyle;
@@ -233,7 +237,7 @@ class DocMd {
 		if (setMap.exists("autobr")) DocMd.autoBR = true;
 		if (setMap.exists("autoapi")) DocMd.autoAPI = true;
 		if (setMap.exists("linear")) DocMd.genMode = Linear;
-		var html = render(dmd);
+		var html = render(dmd, setMap.exists("navmenu") && setMap["toplevel"] == "true");
 		//trace(html);
 		return html;
 	}
