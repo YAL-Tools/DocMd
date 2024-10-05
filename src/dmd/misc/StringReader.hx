@@ -1,4 +1,5 @@
 package dmd.misc;
+import dmd.MiscTools;
 import dmd.misc.CharCode;
 using StringTools;
 
@@ -33,6 +34,10 @@ using StringTools;
 	}
 	public function peekn(count:Int, ofs:Int = 0):String {
 		return source.substr(ofs != 0 ? pos + ofs : pos, count);
+	}
+	
+	public inline function getRow(pos:Int) {
+		return MiscTools.getRow(source, pos);
 	}
 	
 	public inline function skip(n:Int = 1):Void pos += n;

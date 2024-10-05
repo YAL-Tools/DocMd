@@ -1,6 +1,7 @@
 package;
 import dmd.misc.DocMdNav;
 import dmd.nodes.DocMdParser;
+import dmd.nodes.DocMdPos;
 import dmd.nodes.DocMdPrinter;
 import dmd.tags.TagCode;
 #if hscript
@@ -45,8 +46,8 @@ class DocMd {
 		s = ~/[^\w\.\-_]/g.replace(s, "");
 		return s;
 	}
-	public static function render(dmd:String, navmenu:Bool = false) {
-		var nodes = DocMdParser.parse(dmd);
+	public static function render(dmd:String, origin:DocMdPos, navmenu:Bool = false) {
+		var nodes = DocMdParser.parse(dmd, origin);
 		var oldStyle = TagCode.nextStyle;
 		TagCode.nextStyle = null;
 		if (navmenu) {
@@ -224,7 +225,7 @@ class DocMd {
 		return dmd;
 	}
 	
-	public static function renderExt(dmd:String, ?fromDir:String, ?setMap:Map<String, String>) {
+	public static function renderExt(dmd:String, origin:DocMdPos, ?fromDir:String, ?setMap:Map<String, String>) {
 		if (setMap == null) setMap = new Map();
 		collectVariables(dmd, setMap, fromDir);
 		
@@ -237,7 +238,7 @@ class DocMd {
 		if (setMap.exists("autobr")) DocMd.autoBR = true;
 		if (setMap.exists("autoapi")) DocMd.autoAPI = true;
 		if (setMap.exists("linear")) DocMd.genMode = Linear;
-		var html = render(dmd, setMap.exists("navmenu") && setMap["toplevel"] == "true");
+		var html = render(dmd, origin, setMap.exists("navmenu") && setMap["toplevel"] == "true");
 		//trace(html);
 		return html;
 	}

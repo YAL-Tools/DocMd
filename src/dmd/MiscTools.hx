@@ -22,4 +22,14 @@ class MiscTools {
 			//if (++count >= 1024*4) break;
 		}
 	}
+	public static function getRow(str:String, pos:Int) {
+		var row = 0;
+		for (_ in 0 ... 4096) {
+			pos = str.lastIndexOf("\n", pos);
+			if (pos < 0) break;
+			pos -= 1;
+			row += 1;
+		}
+		return row;
+	}
 }

@@ -1,4 +1,5 @@
 package dmd.tags;
+import dmd.nodes.DocMdPos;
 import dmd.tags.TagExecAPI;
 import haxe.ds.Map;
 import haxe.CallStack;
@@ -40,6 +41,16 @@ class TagExec {
 	static function makeErrorBox(text:String) {
 		return '<pre class="error">hscript error!\n' + StringTools.htmlEscape(text) + '</pre>';
 	}
+	static inline function handleError(x:Dynamic){
+		var cs = callstack();
+		var msg = interp.posInfos() + " " + x + cs;
+		#if sys
+		Sys.println(msg);
+		#else
+		trace(msg);
+		#end
+		return makeErrorBox(msg);
+	}
 	static inline function callstack():String {
 		return CallStack.toString(CallStack.exceptionStack());
 	}
@@ -53,13 +64,13 @@ class TagExec {
 			if (val != null && Std.isOfType(val, String)) next.add(val);
 			result = next.toString();
 		} catch (x:Dynamic) {
-			result = makeErrorBox(interp.posInfos() + " " + x + callstack());
+			return handleError(x);
 		}
 		next = last;
 		return result;
 	}
 	
-	public static function exec(s:String) {
+	public static function exec(s:String, origin:DocMdPos) {
 		prepare();
 		var global = dmd.tags.TagExecAPI.global;
 		if (global != null) {
@@ -73,9 +84,10 @@ class TagExec {
 		
 		var html:String = null;
 		var ast = try {
-			parser.parseString(s);
+			parser.line += origin.row;
+			parser.parseString(s, origin.file);
 		} catch (x:Dynamic) {
-			html = makeErrorBox("[L" + parser.line + "] " + x + callstack());
+			html = handleError(x);
 			null;
 		}
 		
@@ -84,7 +96,7 @@ class TagExec {
 			if (result != null && (result is String)) next.add(result);
 			html = next.toString();
 		} catch (x:Dynamic) {
-			html = makeErrorBox(interp.posInfos() + " " + x + callstack());
+			html = handleError(x);
 		}
 		next = last;
 		return html;

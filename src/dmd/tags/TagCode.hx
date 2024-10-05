@@ -2,6 +2,7 @@ package dmd.tags;
 import dmd.gml.GmlAPI;
 import dmd.gml.GmlVersion;
 import dmd.gml.HintGML;
+import dmd.nodes.DocMdPos;
 import haxe.ds.Map;
 import dmd.misc.StringBuilder;
 import gml.*;
@@ -28,7 +29,7 @@ class TagCode {
 	private static inline var rsAlt = "(?:\\s+alt:\\s*(.+))?";
 	private static inline var rsSub = "(?:\\s+sub:\\s*(.+))?";
 	private static inline var rsPost = "\\s*$";
-	public static function add(r:StringBuilder, kind:String, code:String) {
+	public static function add(r:StringBuilder, kind:String, code:String, origin:DocMdPos) {
 		var s3:String;
 		var ptag = true;
 		switch (kind) {
@@ -89,7 +90,7 @@ class TagCode {
 				r.addFormat("<blockquote>%s</blockquote>", code.htmlEscape());
 			};
 			case "quotemd": {
-				r.addFormat("<blockquote>%s</blockquote>", render(code));
+				r.addFormat("<blockquote>%s</blockquote>", render(code, origin));
 			};
 			case "gml": {
 				code = code.replace("\t", "    ");
@@ -125,7 +126,7 @@ class TagCode {
 			};
 			#if hscript
 			case "exec": { // exec ...hscript
-				r.addString(TagExec.exec(code));
+				r.addString(TagExec.exec(code, origin));
 			};
 			#end
 			default: {

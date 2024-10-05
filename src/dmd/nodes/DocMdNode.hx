@@ -1,4 +1,5 @@
 package dmd.nodes;
+import dmd.nodes.DocMdPos;
 
 /**
  * ...
@@ -25,10 +26,10 @@ enum DocMdNode {
 	
 	// Blocks:
 	InlineCode(text:String);
-	Code(kind:String, text:String);
+	Code(kind:String, text:String, pos:DocMdPos);
 	NestList(kind:String, pre:Array<DocMdNode>, items:Array<Array<DocMdNode>>);
 	Section(ref:DocMdSection);
-	Exec(code:String);
+	Exec(code:String, pos:DocMdPos);
 }
 class DocMdSection {
 	public var depth:Int;

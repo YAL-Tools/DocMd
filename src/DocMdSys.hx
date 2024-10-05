@@ -6,6 +6,7 @@ import dmd.gml.GmlAPI;
 import dmd.gml.HintGML;
 import dmd.misc.DocMdNav;
 import dmd.nodes.DocMdParser;
+import dmd.nodes.DocMdPos;
 import haxe.io.Path;
 import dmd.misc.StringReader;
 import dmd.misc.StringBuilder;
@@ -48,7 +49,7 @@ class DocMdSys {
 	public static var templateVars:Map<String, String> = new Map();
 	public static var argTemplateVars:Map<String, String> = new Map();
 	public static var currentDir:String = null;
-	public static function procMd(dmd:String, fromDir:String, tplPath:String, to:String){
+	public static function procMd(dmd:String, origin:DocMdPos, fromDir:String, tplPath:String, to:String){
 		currentDir = fromDir;
 		// variables:
 		var setMap = templateVars;
@@ -71,7 +72,7 @@ class DocMdSys {
 		
 		//
 		setMap["toplevel"] = "true";
-		var html = DocMd.renderExt(dmd, fromDir, setMap);
+		var html = DocMd.renderExt(dmd, origin, fromDir, setMap);
 		setMap.remove("toplevel");
 		if (setMap.exists("template")) {
 			tplPath = setMap["template"];
@@ -196,7 +197,10 @@ class DocMdSys {
 				var fb = rx.matched(3);
 				if (setMap.exists(id)) {
 					var value = setMap[id];
-					if (isMd) return DocMd.render(value);
+					if (isMd) {
+						var ori = new DocMdPos("htmlv:" + id);
+						return DocMd.render(value, ori);
+					}
 					return value;
 				} else if (fb != null) {
 					return fb;
@@ -261,7 +265,8 @@ class DocMdSys {
 		var dmd:String = File.getContent(from);
 		if (dmd == "" && lastOutput != "") return false;
 		var fromDir = Path.directory(from);
-		return procMd(dmd, fromDir, tpl, to);
+		var origin = new DocMdPos(from);
+		return procMd(dmd, origin, fromDir, tpl, to);
 	}
 	public static function procArgs(args:Array<String>) {
 		var extraParamsText:String = null;

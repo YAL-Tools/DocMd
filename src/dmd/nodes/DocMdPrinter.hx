@@ -75,8 +75,8 @@ class DocMdPrinter {
 				buf.addFormat("<code>%s</code>", StringTools.htmlEscape(text));
 			case InlineImage(src, alt):
 				buf.addFormat('<img src="%s" alt="%s"/>', src, StringTools.htmlEscape(alt, true));
-			case Code(kind, text):
-				TagCode.add(buf, kind, text);
+			case Code(kind, text, origin):
+				TagCode.add(buf, kind, text, origin);
 			case Section(section): {
 				var depth = section.depth;
 				var title = section.title;
@@ -188,8 +188,8 @@ class DocMdPrinter {
 				buf.addFormat("</%s>", kind);
 			};
 			#if hscript
-			case Exec(hx):
-				var html = TagExec.exec(hx);
+			case Exec(hx, origin):
+				var html = TagExec.exec(hx, origin);
 				buf.add(html);
 			#end
 			default:
@@ -221,15 +221,15 @@ class DocMdPrinter {
 					}
 					continue;
 				#if hscript
-				case Exec(hx):
-					var html = TagExec.exec(hx);
+				case Exec(hx, origin):
+					var html = TagExec.exec(hx, origin);
 					if (isBlock.match(html)) noPara();
 					buf.add(html);
 					continue;
 				#end
-				case Code(kind, code):
+				case Code(kind, code, origin):
 					var tmp = new StringBuilder();
-					TagCode.add(tmp, kind, code);
+					TagCode.add(tmp, kind, code, origin);
 					var html = tmp.toString();
 					if (isBlock.match(html)) noPara();
 					buf.add(html);

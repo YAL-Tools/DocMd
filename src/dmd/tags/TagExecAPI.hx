@@ -1,4 +1,5 @@
 package dmd.tags;
+import dmd.nodes.DocMdPos;
 import dmd.nodes.DocMdPrinter;
 import dmd.tags.TagExec;
 import haxe.Rest;
@@ -74,7 +75,7 @@ class TagExecAPI {
 		g["render"] = renderAuto;
 		g["include"] = function(path:String) {
 			awaitChanges(path);
-			return DocMd.render(getContent(path));
+			return DocMd.render(getContent(path), new DocMdPos(path));
 		};
 		
 		g["sfmt"] = Reflect.makeVarArgs(function(args:Array<Dynamic>) {

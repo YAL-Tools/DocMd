@@ -1,6 +1,8 @@
 package dmd.nodes;
+import dmd.MiscTools;
 import dmd.misc.StringReader;
 import dmd.nodes.DocMdNode;
+import dmd.nodes.DocMdPos;
 using dmd.nodes.DocMdNodeTools;
 using StringTools;
 
@@ -17,10 +19,15 @@ class DocMdParser {
 	}
 	
 	var reader:StringReader;
+	var origin:DocMdPos;
 	var sectionPrefix = "";
 	var headerDepth = 0;
-	function new(dmd:String) {
+	function new(dmd:String, origin:DocMdPos) {
 		reader = new StringReader(dmd);
+		this.origin = origin;
+	}
+	public function makePos(pos:Int) {
+		return new DocMdPos(origin.file, origin.row + reader.getRow(pos));
 	}
 	
 	static function makeID(s:String) {
@@ -336,7 +343,7 @@ class DocMdParser {
 				}
 				//
 				//trace(mode, '<<$code>>');
-				out.push(Code(mode, code));
+				out.push(Code(mode, code, makePos(from)));
 				start = reader.pos;
 			};
 			case "-".code if (reader.peek(1) == "-".code && reader.peek(2) == "-".code): { // --- HR
@@ -386,7 +393,7 @@ class DocMdParser {
 				if (s != null) out.push(InlineCode(s));
 				start = reader.pos;
 			};
-			case "$".code if (reader.peek(1) == "{".code): {
+			case "$".code if (reader.peek(1) == "{".code): { // ${snip}
 				flushSkip(out, 2);
 				var depth = 1;
 				while (reader.loop) {
@@ -407,7 +414,7 @@ class DocMdParser {
 				}
 				var hx = reader.substring(from + 2, reader.pos);
 				if (reader.loop) reader.skip();
-				out.push(Exec(hx));
+				out.push(Exec(hx, makePos(from)));
 				start = reader.pos;
 			};
 			case "$".code if (reader.peek(1) == "[".code): { // $[func], $[func](arg)
@@ -421,7 +428,7 @@ class DocMdParser {
 				} else {
 					hx = func + "();";
 				}
-				out.push(Exec(hx));
+				out.push(Exec(hx, makePos(from)));
 				start = reader.pos;
 			};
 			case "%".code if (reader.peek(1) == "{".code): {
@@ -433,9 +440,9 @@ class DocMdParser {
 		}
 	}
 	
-	public static function parse(dmd:String) {
+	public static function parse(dmd:String, origin:DocMdPos) {
 		dmd = StringTools.replace(dmd, "\r", "");
-		var parser = new DocMdParser(dmd);
+		var parser = new DocMdParser(dmd, origin);
 		var nodes = [];
 		while (parser.reader.loop) parser.read(nodes);
 		parser.flush(nodes);
