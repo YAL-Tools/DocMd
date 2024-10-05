@@ -1,5 +1,6 @@
 package dmd.tags;
 import dmd.nodes.DocMdPrinter;
+import dmd.tags.TagExec;
 import haxe.Rest;
 import haxe.io.Path;
 import hscript.Interp;
@@ -40,7 +41,9 @@ class TagExecAPI {
 			if (hadNavMenu) setMap.remove("navmenu");
 			cwd = DocMdSys.currentDir;
 			#end
+			var execState = TagExec.store();
 			var result = DocMd.renderExt(dmd, null, setMap);
+			TagExec.restore(execState);
 			#if sys
 			if (hadNavMenu) setMap["navmenu"] = navMenu;
 			#end

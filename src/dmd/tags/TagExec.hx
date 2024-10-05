@@ -24,6 +24,13 @@ class TagExec {
 		parser = null;
 		interp = null;
 	}
+	public static function store() {
+		return { parser: parser, interp: interp };
+	}
+	public static function restore(obj){
+		parser = obj.parser;
+		interp = obj.interp;
+	}
 	public static function prepare() {
 		if (parser != null) return;
 		parser = new Parser();
