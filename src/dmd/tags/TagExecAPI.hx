@@ -19,6 +19,13 @@ class TagExecAPI {
 				return File.getContent(full);
 			} else throw "Out of bounds";
 		}
+		function saveContent(path:String, text:String) {
+			var dir = DocMdSys.dir;
+			var full = Path.normalize(dir + "/" + path);
+			if (StringTools.startsWith(full, dir)) {
+				File.saveContent(full, text);
+			} else throw "Out of bounds";
+		}
 		function awaitChanges(path:String):Void {
 			var full = DocMdSys.expandPath(path);
 			if (full == null) return;
@@ -100,6 +107,7 @@ class TagExecAPI {
 		#if sys
 		g["File"] = {
 			getContent: getContent,
+			saveContent: saveContent,
 			awaitChanges: awaitChanges
 		};
 		#end
