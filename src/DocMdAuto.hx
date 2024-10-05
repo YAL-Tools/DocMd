@@ -1,4 +1,5 @@
 package;
+import dmd.nodes.DocMdPos;
 import haxe.Json;
 import haxe.io.Path;
 import haxe.macro.Context;
@@ -373,7 +374,8 @@ class DocMdAuto {
 		//File.saveContent("temp.dmd", out.toString());
 	}
 	static function onAfterGenerate(path:String, dir:String, outPath:String, out:StringBuf) {
-		DocMdSys.procMd(out.toString(), dir, outPath, outPath);
+		var pos = new DocMdPos("auto");
+		DocMdSys.procMd(out.toString(), pos, dir, outPath, outPath);
 	}
 	public static function proc(path:String, ?outPath:String, ?args:Array<String>) {
 		#if !display
