@@ -43,7 +43,9 @@ class TagExec {
 	}
 	static inline function handleError(x:Dynamic){
 		var cs = callstack();
-		var msg = interp.posInfos() + " " + x + cs;
+		var inf = interp.posInfos();
+		var infs = "[" + inf.fileName + ":" + inf.lineNumber + "]";
+		var msg = infs + " " + x + cs;
 		#if sys
 		Sys.println(msg);
 		#else

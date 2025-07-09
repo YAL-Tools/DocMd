@@ -53,6 +53,7 @@ class TagExecAPI {
 		var g = interp.variables;
 		// std:
 		g["Std"] = Std;
+		g["Array"] = Array;
 		g["Math"] = Math;
 		g["String"] = String;
 		g["StringTools"] = StringTools;
@@ -98,6 +99,7 @@ class TagExecAPI {
 			addCodeTag: function(name:String, hdl:String->Dynamic) {
 				TagCode.customTags.set(name, hdl);
 			},
+			unindent: dmd.gml.HintGML.unindent,
 			printer: null,
 			sectionStack: null,
 			#if sys
