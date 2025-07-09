@@ -13,7 +13,7 @@ import dmd.gml.HintGML.GmlToken.*;
  */
 class HintGML {
 	public static var rxScript = ~/^scr[_A-Z]/g;
-	public static var rxAsset = ~/^(?:obj|spr|bck|rm|fnt|snd|tl)[_A-Z]/g;
+	public static var rxAsset = ~/^(?:obj|spr|bck|rm|fnt|snd|tl|sh)[_A-Z]/g;
 	public static var version:Int = 1;
 	public static var liveExt:Bool = false;
 	static var mode:GMLMode = GML;
@@ -22,8 +22,14 @@ class HintGML {
 		var isGML = mode == GML;
 		var isLua = mode == Lua;
 		var isAHK = mode == AHK;
-		var keywords = isAHK ? AHKAPI.keywords : (isLua ? LuaAPI.keywords : GmlAPI.keywords);
-		var builtin = isLua || isAHK ? new Map() : GmlAPI.builtin;
+		var isJS = mode == JS;
+		var keywords = switch (mode) {
+			case Lua: LuaAPI.keywords;
+			case JS: JSAPI.keywords;
+			case AHK: AHKAPI.keywords;
+			case GML: GmlAPI.keywords;
+		}
+		var builtin = isGML ? GmlAPI.builtin : new Map();
 		var start:Int, c:Int, c1:Int;
 		var i:Int, s:String;
 		inline function add(tk:GmlToken):Void {
@@ -65,7 +71,6 @@ class HintGML {
 		//
 		var cubDepth:Int = 0;
 		var v = version;
-		var lx = liveExt;
 		while (q.loop) {
 			start = q.pos;
 			c = q.read();
@@ -108,11 +113,14 @@ class HintGML {
 							}
 							add(Comment(q.substring(start, q.pos)));
 						};
+						case "#pragma" if (liveExt): {
+							q.skipLine();
+							add(Meta(q.substring(start, q.pos)));
+						};
 						default: q.pos = start + 1; add(Op("#"));
 					}
 				};
 				case ";".code if (isAHK): {
-					q.skip();
 					while (q.loop) {
 						switch (q.peek()) {
 							case "\r".code, "\n".code: { }; // ->
@@ -252,7 +260,7 @@ class HintGML {
 					}
 					add(CString(q.substring(start, q.pos)));
 				};
-				case "`".code: if (lx) {
+				case "`".code: if (liveExt || isJS) {
 					c1 = q.peek();
 					while (c1 != "`".code && q.loop) {
 						q.skip();
@@ -370,7 +378,8 @@ class HintGML {
 								c = q.peek();
 								if(c >= "0".code && c <= "9".code
 								|| c >= "A".code && c <= "F".code
-								|| c >= "a".code && c <= "f".code) {
+								|| c >= "a".code && c <= "f".code
+								|| c == "_".code) {
 									q.pos += 1;
 								} else break;
 							}
@@ -379,7 +388,7 @@ class HintGML {
 						default: {
 							while (q.loop) {
 								c = q.peek();
-								if (c == ".".code || c >= "0".code && c <= "9".code) {
+								if (c == ".".code || c >= "0".code && c <= "9".code || c == "_".code) {
 									q.pos += 1;
 								} else break;
 							}
@@ -657,6 +666,7 @@ enum GMLMode {
 	GML;
 	Lua;
 	AHK;
+	JS;
 }
 
 enum GmlToken {

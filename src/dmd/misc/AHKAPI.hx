@@ -8,7 +8,7 @@ class AHKAPI {
 	static function keywords_init() {
 		var r = new Map();
 		var kd = [ //{
-			"class", "extends",
+			"class", "extends", "this",
 			"for", "while", "loop", "until",
 			"break", "continue",
 			"and", "or", "xor", "not",

@@ -14,6 +14,7 @@ import gml.*;
 import sys.FileSystem;
 import sys.io.File;
 import tags.*;
+import dmd.gml.HintGML;
 #if sys
 import dmd.Misc;
 #end
@@ -238,6 +239,7 @@ class DocMd {
 		if (setMap.exists("autobr")) DocMd.autoBR = true;
 		if (setMap.exists("autoapi")) DocMd.autoAPI = true;
 		if (setMap.exists("linear")) DocMd.genMode = Linear;
+		if (setMap.exists("tag:gml:live")) HintGML.liveExt = true;
 		var html = render(dmd, origin, setMap.exists("navmenu") && setMap["toplevel"] == "true");
 		//trace(html);
 		return html;

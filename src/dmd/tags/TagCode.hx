@@ -121,6 +121,11 @@ class TagCode {
 				code = procCode(HintGML.proc(code, "ahk", true, null, AHK));
 				r.addString(code);
 			};
+			case "js": {
+				HintGML.version = 2;
+				code = procCode(HintGML.proc(code, "gmlmd", true, null, JS));
+				r.addString(code);
+			};
 			case "raw": {
 				r.addString(code);
 			};
