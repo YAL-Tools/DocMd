@@ -19,6 +19,10 @@ abstract CharCode(Int) from Int to Int {
 	}
 	public function isSpace1_ni() return isSpace1();
 	
+	public function isDigit(){
+		return this >= "0".code && this <= "9".code;
+	}
+	
 	public function isIdent0() {
 		return (this == "_".code
 			|| (this >= "a".code && this <= "z".code)

@@ -27,6 +27,9 @@ class DocMdParser {
 		this.origin = origin;
 	}
 	public function makePos(pos:Int) {
+		if (origin == null) {
+			return new DocMdPos("?", 0);
+		}
 		return new DocMdPos(origin.file, origin.row + reader.getRow(pos));
 	}
 	
@@ -111,9 +114,18 @@ class DocMdParser {
 							flushListItem(2);
 							continue;
 					}
+				case _ if (kind == "ol" && c.isDigit() && (reader.peek(1) == ".".code
+					|| reader.peek(1).isDigit() && reader.peek(2) == ".".code
+				)):
+					if (reader.isLineStart(reader.pos)) {
+						if (reader.peek(1) == ".".code) {
+							flushListItem(2);
+						} else flushListItem(3);
+						continue;
+					}
 				case "}".code:
 					flushSkip(nodes);
-				break;
+					break;
 			}
 			read(nodes);
 		}
