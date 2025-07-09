@@ -99,20 +99,31 @@ class DocMdPrinter {
 				switch (DocMd.genMode) {
 					case Nested: {
 						buf.addString('<section');
+						var isLink = permalink != null && permalink.contains("://");
 						var isEmpty = children.length == 0;
-						if (isEmpty) {
+						inline function addTag(tag:String) {
 							hasTags = true;
 							if (tagClass != "") {
-								tagClass += " empty";
-							} else tagClass = "empty";
+								tagClass += " " + tag;
+							} else tagClass = tag;
+						}
+						if (isLink) {
+							addTag("link");
+						} else if (isEmpty) {
+							addTag("empty");
 						}
 						if (hasTags) buf.addFormat(' class="%s"', tagClass);
 						buf.addString('><header');
 						if (permalink != null) {
-							buf.addFormat(' id="%s"', permalink);
+							if (!isLink) buf.addFormat(' id="%s"', permalink);
 							//if (className != null) buf.addFormat(' class="%s"', className);
-							buf.addFormat('><a href="#%s"', permalink);
-							buf.add(' title="(permalink)"');
+							buf.addFormat('><a href="%s"', (isLink ? "" : "#") + permalink);
+							if (isLink) {
+								buf.addString(' target="_blank"');
+								buf.add(' title="(opens a new tab)"');
+							} else {
+								buf.add(' title="(permalink)"');
+							}
 						} else if (hasTags) {
 							buf.add('><span');
 						}
