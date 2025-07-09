@@ -1,0 +1,5 @@
+--neko bin/docmd.n
+--class-path src
+--main DocMdSys
+--dce no
+--library hscript
