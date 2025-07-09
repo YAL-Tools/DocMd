@@ -30,6 +30,11 @@ class DocMdSys {
 		var full = Path.normalize(dir + "/" + path);
 		return full.startsWith(dir) ? full : null;
 	}
+	public static function statOf(path:String) {
+		if (FileSystem.exists(path)) {
+			return FileSystem.stat(path);
+		} else return null;
+	}
 	public static function timeOf(path:String):Float {
 		if (FileSystem.exists(path)) {
 			return FileSystem.stat(path).mtime.getTime();
@@ -401,56 +406,158 @@ class DocMdSys {
 			for (line in lines) Sys.println(line);
 			return;
 		}
-		var from = args[0];
-		var tpl = args[1];
-		var to = args[2];
-		if (tpl == null) {
-			var nx = Path.withoutExtension(from);
-			tpl = nx + ".dmd.html";
-			to = nx + ".html";
-		} else if (to == null) to = tpl;
 		
-		dir = argsOut.dir ?? Path.directory(from);
-		dir = Path.normalize(dir);
-		if (dir == "") dir = Path.normalize(Sys.getCwd());
-		
-		var time = 0.;
-		var time_tpl = 0.;
-		if (!watch) {
-			DocMd.reset();
-			procPath(from, tpl, to);
+		// input(s):
+		var pairs = [];
+		var watchDir = args[0] == "--dmd-dir" ? args[1] : null;
+		var outDir = null;
+		if (watchDir != null) {
+			outDir = args[2] ?? watchDir;
+			pairs.pop();
+			args.splice(0, 2);
+		} else if (args[0] == "--pairs") {
+			pairs.pop();
+			var i = 1;
+			var total = (args.length - 1) >> 1;
+			while (i < args.length) {
+				var from = args[i++];
+				var to = args[i++];
+				var tpl = Path.withExtension(from, "dmd.html");
+				awaitChanges = [];
+				pairs.push({
+					from: from,
+					fromRel: Path.withoutDirectory(from),
+					fromTime: 0.,
+					tpl: tpl,
+					tplTime: 0.,
+					to: to,
+					awaitChanges: awaitChanges,
+					keep: true,
+				});
+				var ind = (i - 1) >> 1;
+				Sys.println('[$ind/$total] $from -> $to');
+				procPath(from, tpl, to);
+			}
+			Sys.println("OK!");
 			return;
+		} else {
+			var pair = {
+				from: args[0],
+				fromRel: Path.withoutDirectory(args[0]),
+				fromTime: 0.,
+				tpl: args[1],
+				tplTime: 0.,
+				to: args[2],
+				awaitChanges: awaitChanges,
+				keep: true,
+			};
+			if (pair.tpl == null) {
+				pair.tpl = Path.withExtension(pair.from, "dmd.html");
+				pair.to = Path.withExtension(pair.from, "html");
+			} else if (pair.to == null) {
+				pair.to = pair.tpl;
+			}
+			pairs.push(pair);
 		}
+		
+		dir = argsOut.dir;
+		if (dir == null && pairs.length > 0) {
+			dir = Path.directory(pairs[0].from);
+		}
+		if (dir != null) dir = Path.normalize(dir);
+		if (dir == null || dir == "") dir = Path.normalize(Sys.getCwd());
+		
 		if (server != -1) {
 			sys.thread.Thread.create(function() {
 				dmd.WebServer.start(server);
 			});
 		}
+		
+		var sleepTime = 0.5;
+		if (watchDir != null) {
+			sleepTime = 1;
+		}
 		while (true) {
-			Sys.sleep(0.5);
-			var t = timeOf(from);
-			var t2 = tpl != to ? timeOf(tpl) : 0.;
-			var tz = false;
-			for (pair in awaitChanges) {
-				if (timeOf(pair.path) > pair.time) {
-					tz = true; break;
+			if (watchDir != null) {
+				for (pair in pairs) pair.keep = false;
+				for (rel in FileSystem.readDirectory(watchDir)) {
+					var ext = Path.extension(rel).toLowerCase();
+					if (ext != "md" && ext != "dmd") continue;
+					
+					var found = false;
+					for (pair in pairs) {
+						if (pair.fromRel == rel) {
+							pair.keep = true;
+							found = true;
+							break;
+						}
+					}
+					if (found) continue;
+					// add new file:
+					awaitChanges = [];
+					var from = Path.join([watchDir, rel]);
+					var pair = {
+						from: from,
+						fromRel: rel,
+						fromTime: 0.,
+						tpl: Path.withExtension(from, "dmd.html"),
+						tplTime: 0.,
+						to: Path.join([outDir, Path.withExtension(rel, "html")]),
+						awaitChanges: awaitChanges,
+						keep: true,
+					};
+					pairs.push(pair);
+					if (watch) Sys.println('Watching "$from"');
+				}
+				// remove unreferenced files:
+				var i = pairs.length;
+				while (--i >= 0) {
+					var pair = pairs[i];
+					if (!pair.keep) {
+						Sys.println('Un-watching "${pair.fromRel}"');
+						pairs.splice(i, 1);
+					}
 				}
 			}
-			if (time != t && FileSystem.stat(from).size > 0 || time_tpl != t2 || tz) {
-				time = t; time_tpl = t2;
+			for (pair in pairs) {
+				var fromStat = statOf(pair.from);
+				if (fromStat == null) continue;
+				var tplStat = statOf(pair.tpl);
+				//
+				var hasChanges = false;
+				if (fromStat.mtime.getTime() != pair.fromTime) {
+					if (fromStat.size == 0) continue;
+					hasChanges = true;
+				}
+				if (pair.tpl != pair.to && tplStat != null && tplStat.mtime.getTime() != pair.tplTime) {
+					if (tplStat.size == 0) continue;
+					hasChanges = true;
+				}
+				if (!hasChanges) for (acPair in pair.awaitChanges) {
+					if (timeOf(acPair.path) > acPair.time) {
+						hasChanges = true;
+					}
+				}
+				if (!hasChanges) continue;
+				//
+				pair.fromTime = fromStat.mtime.getTime();
+				if (tplStat != null) pair.tplTime = tplStat.mtime.getTime();
+				awaitChanges = pair.awaitChanges;
 				awaitChanges.resize(0);
-				Sys.print("[" + Date.now().toString() + "] Rendering... ");
+				Sys.print("[" + Date.now().toString() + '] Rendering "${pair.fromRel}"... ');
 				try {
 					DocMd.reset();
-					procPath(from, tpl, to);
+					procPath(pair.from, pair.tpl, pair.to);
 					Sys.println("OK!");
 				} catch (e:Dynamic) {
 					Sys.println("error!");
 					Sys.println("" + e);
 					Sys.println(haxe.CallStack.exceptionStack().join("\n"));
 				}
-			}
-		}
+			} // for pair in pairs
+			if (!watch) break;
+			Sys.sleep(sleepTime);
+		} // while watch
 	}
 	
 }
