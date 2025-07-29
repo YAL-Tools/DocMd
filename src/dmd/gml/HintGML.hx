@@ -68,6 +68,32 @@ class HintGML {
 				} else break;
 			}
 		}
+		function addComment(text:String, multiline:Bool) {
+			var at = text.indexOf("@");
+			var start = 0;
+			if ((isGML || isJS)
+				&& text.charCodeAt(2) != (multiline ? "*".code : "/".code)
+			) {
+				// not a doc-comment
+			} else while (at >= 0) {
+				var c = text.charCodeAt(at + 1);
+				if (isIdent0(c)) {
+					var nameEnd = at + 1;
+					c = text.charCodeAt(nameEnd);
+					while (isIdent1(c)) {
+						if (++nameEnd >= text.length) break;
+						c = text.charCodeAt(nameEnd);
+					}
+					var tag = text.substring(at, nameEnd);
+					add(Comment(text.substring(start, at)));
+					add(CommentTag(text.substring(at, nameEnd)));
+					start = nameEnd;
+					at = nameEnd;
+				}
+				at = text.indexOf("@", at + 1);
+			}
+			add(Comment(text.substring(start, text.length)));
+		}
 		//
 		var cubDepth:Int = 0;
 		var v = version;
@@ -127,7 +153,7 @@ class HintGML {
 							default: q.skip(); continue;
 						}; break;
 					}
-					add(Comment(q.substring(start, q.pos)));
+					addComment(q.substring(start, q.pos), false);
 				};
 				case "?".code, ":".code, "~".code, ";".code, ",".code: {
 					addOp();
@@ -141,6 +167,7 @@ class HintGML {
 						};
 						case "-".code: {
 							if (isLua) {
+								// ah, no block comments
 								q.skip();
 								while (q.loop) {
 									switch (q.peek()) {
@@ -148,7 +175,7 @@ class HintGML {
 										default: q.skip(); continue;
 									}; break;
 								}
-								add(Comment(q.substring(start, q.pos)));
+								addComment(q.substring(start, q.pos), false);
 							} else {
 								q.skip();
 								addOp();
@@ -181,7 +208,7 @@ class HintGML {
 								default: q.skip(); continue;
 							}; break;
 						}
-						add(Comment(q.substring(start, q.pos)));
+						addComment(q.substring(start, q.pos), false);
 					};
 					case "*".code if (isGML): {
 						q.skip();
@@ -194,7 +221,7 @@ class HintGML {
 								}
 							} else q.skip();
 						}
-						add(Comment(q.substring(start, q.pos)));
+						addComment(q.substring(start, q.pos), true);
 					};
 					case "=".code: q.skip(); addOp();
 					default: addOp();
@@ -434,7 +461,7 @@ class HintGML {
 					while (pos < end) {
 						switch (tokens[pos++]) {
 							case Spaces(_): continue;
-							case Comment(_): continue;
+							case Comment(_), CommentTag(_): continue;
 							case Op(":"): {
 								switch (tokens[pos]) {
 									case Ident(t): {
@@ -580,6 +607,7 @@ class HintGML {
 			case Macro: cl("md", "#macro");
 			case Meta(s): cl("md", s);
 			case Comment(s): cl("co", s);
+			case CommentTag(s): cl("cm", s);
 			case Op(s): cl("op", s);
 			case Number(s): cl("nu", s);
 			case CString(s): cl("st", s);
@@ -672,6 +700,7 @@ enum GMLMode {
 enum GmlToken {
 	Spaces(s:String); // ` \t\r\n`
 	Comment(s:String); // // some
+	CommentTag(s:String); // @param
 	//
 	Define; // #define
 	Macro; // #macro

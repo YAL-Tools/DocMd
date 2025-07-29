@@ -2,6 +2,7 @@
 pre.gmlmd .md { color: #7A81A9 } /* #define */
 pre.gmlmd .kw { color: #008; font-weight: bold } /* keyword */
 pre.gmlmd .co { color: #080 } /* comment */
+pre.gmlmd .cm { color: #914BAF } /* comment meta */
 pre.gmlmd .nu { color: #F03232 } /* number */
 pre.gmlmd .nx { color: #00f } /* hex */
 pre.gmlmd .st { color: #00f } /* string */
@@ -28,6 +29,7 @@ pre.gmlmd a.sf, #doc pre a.sv {
 
 #night:checked + .main pre.gmlmd .op { color: #CCCCCC }
 #night:checked + .main pre.gmlmd .co { color: #5B995B }
+#night:checked + .main pre.gmlmd .cm { color: #A7B }
 #night:checked + .main pre.gmlmd .kw { color: #FFB871 }
 #night:checked + .main pre.gmlmd .md { color: #FFB871 }
 #night:checked + .main pre.gmlmd .cb { color: #FFB871 }
