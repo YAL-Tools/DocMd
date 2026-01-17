@@ -6,6 +6,7 @@ import dmd.misc.StringBuilder;
 import dmd.misc.StringReader;
 import dmd.gml.GmlAPI;
 import dmd.gml.HintGML.GmlToken.*;
+using StringTools;
 
 /**
  * ...
@@ -29,7 +30,12 @@ class HintGML {
 			case AHK: AHKAPI.keywords;
 			case GML: GmlAPI.keywords;
 		}
-		var builtin = isGML ? GmlAPI.builtin : new Map();
+		var anyCase = isAHK;
+		var builtin = switch (mode) {
+			case GML: GmlAPI.builtin;
+			case AHK: AHKAPI.builtin;
+			default: new Map();
+		}
 		var start:Int, c:Int, c1:Int;
 		var i:Int, s:String;
 		inline function add(tk:GmlToken):Void {
@@ -124,7 +130,9 @@ class HintGML {
 					}
 					s = q.substring(start, q.pos);
 					if (isAHK) {
-						add(Meta(s));
+						if (s.length > 1) {
+							add(Meta(s));
+						} else add(Op(s));
 					} else switch (s) {
 						case "#define": add(Define);
 						case "#macro": add(Macro);
@@ -155,7 +163,11 @@ class HintGML {
 					}
 					addComment(q.substring(start, q.pos), false);
 				};
-				case "?".code, ":".code, "~".code, ";".code, ",".code: {
+				case ":".code: {
+					if (q.peek() == "=".code) q.skip();
+					addOp();
+				};
+				case "?".code, "~".code, ";".code, ",".code: {
 					addOp();
 				};
 				case "-".code: {
@@ -337,6 +349,7 @@ class HintGML {
 				): { // ident
 					skipIdent();
 					s = q.substring(start, q.pos);
+					var slq = anyCase ? s.toLowerCase() : s;
 					if (s == "global") {
 						add(Keyword(s));
 						start = q.pos;
@@ -354,7 +367,7 @@ class HintGML {
 							skipIdent();
 							if (q.pos > start) add(Global(q.substring(start, q.pos)));
 						}
-					} else if (keywords.exists(s) || isAHK && keywords.exists(s.toLowerCase())) {
+					} else if (keywords.exists(s) || anyCase && keywords.exists(slq)) {
 						add(Keyword(s));
 					} else {
 						i = q.pos;
@@ -367,8 +380,11 @@ class HintGML {
 							}; break;
 						}
 						if (q.get(i) == "(".code) {
-							add(builtin.exists(s) ? Func(s) : Script(s));
-						} else if (builtin.exists(s)) {
+							add(builtin.exists(s) || anyCase && builtin.exists(slq) ? Func(s) : Script(s));
+						} else if (builtin.exists(s)
+							|| anyCase && builtin.exists(slq)
+							|| isAHK && s.startsWith("A_")
+						) {
 							add(Builtin(s));
 						} else if (GmlAPI.assets.exists(s)) {
 							add(Asset(s));
@@ -436,17 +452,33 @@ class HintGML {
 		return tokens;
 	}
 	static function parseLocals(
-		locals:Map<String, Bool>, tokens:Array<GmlToken>, start:Int, end:Int
+		locals:Map<String, Bool>, tokens:Array<GmlToken>, start:Int, end:Int, mode:GMLMode
 	) {
 		var pos = start;
+		var isAHK = mode == AHK;
 		while (pos < end) {
 			switch (tokens[pos++]) {
-				case Keyword("var"), Keyword("local"), Keyword("static"): {};
-				case Keyword("catch"): {
+				case Keyword("var") if (mode == GML || mode == JS): {};
+				case Keyword("static") if (mode == GML || mode == AHK): {};
+				case Keyword("local") if (mode == AHK || mode == Lua): {};
+				case Keyword("catch"): { // `catch (v)` declares `v`
 					if (pos < end && tokens[pos].match(Spaces(_))) pos++;
 					if (pos < end && tokens[pos].match(ParOpen)) pos++;
 					if (pos < end && tokens[pos].match(Spaces(_))) pos++;
 					if (pos < end) switch (tokens[pos++]) {
+						case Ident(v): locals.set(v, true);
+						default: {};
+					}
+					continue;
+				};
+				case Op(":=") if (isAHK): { // bad implementation of assume-local
+					var prevAt = pos - 2;
+					while (prevAt >= 0) {
+						if (tokens[prevAt].match(Spaces(_))) {
+							prevAt--;
+						} else break;
+					}
+					if (prevAt >= 0) switch (tokens[prevAt]) {
 						case Ident(v): locals.set(v, true);
 						default: {};
 					}
@@ -481,11 +513,12 @@ class HintGML {
 				case ParClose, SqbClose: depth--;
 				case Op(","): if (depth == 0) depth--;
 				case Op(";"): loop = false;
+				case Spaces(s) if (isAHK && s.indexOf("\n") >= 0): loop = false;
 				default: continue;
 			}
 		}
 	}
-	static function hintLocals(tokens:Array<GmlToken>, scopes:Map<String, Map<String, Bool>>) {
+	static function hintLocals(tokens:Array<GmlToken>, scopes:Map<String, Map<String, Bool>>, mode:GMLMode) {
 		var length = tokens.length;
 		var scripts = new Map<String, Bool>();
 		for (pos in 0 ... length) {
@@ -547,7 +580,7 @@ class HintGML {
 			}
 			
 			//
-			parseLocals(locals, tokens, pos, end);
+			parseLocals(locals, tokens, pos, end, mode);
 			
 			//
 			var pos = start - 1;
@@ -632,7 +665,7 @@ class HintGML {
 		if (cname != null) q.addString('</pre>');
 		return q.toString();
 	}
-	private static function parseHint(code:String) {
+	private static function parseHint(code:String, mode:GMLMode) {
 		var tokens = parse(code);
 		var scopes = new Map();
 		var scope = "";
@@ -645,7 +678,7 @@ class HintGML {
 			//
 			var locals = scopes != null ? scopes[scope] : null;
 			if (locals == null) locals = new Map<String, Bool>();
-			parseLocals(locals, tokens, start, end);
+			parseLocals(locals, tokens, start, end, mode);
 			scopes.set(scope, locals);
 			//
 			if (end + 2 < length) switch (tokens[end + 2]) {
@@ -681,8 +714,8 @@ class HintGML {
 		}
 		#end
 		var tokens = parse(code);
-		var scopes = hint != null ? parseHint(hint) : null;
-		hintLocals(tokens, scopes);
+		var scopes = hint != null ? parseHint(hint, mode) : null;
+		hintLocals(tokens, scopes, m);
 		return print(tokens, preClassName);
 	}
 }
