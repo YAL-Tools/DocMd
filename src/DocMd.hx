@@ -210,6 +210,10 @@ class DocMd {
 		#if sys
 		if (fromDir != null) dmd = new EReg("(^\\s+)?%\\[\\./(.+?)\\]", "gm").map(dmd, function(r:EReg) {
 			var rel = r.matched(2);
+			var path = Misc.resolve(rel, fromDir);
+			if (path != null) {
+				DocMdSys.awaitChangesFor(path);
+			}
 			var code = Misc.getText(rel, fromDir);
 			if (code == null) {
 				Sys.println("Couldn't find " + rel);
